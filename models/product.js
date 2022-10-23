@@ -29,7 +29,7 @@ const productSchema = new mongoose.Schema(
             required: true,
         },
         inMoney: {
-            type: Number,
+            type: String,
             required: true,
         },
     },
