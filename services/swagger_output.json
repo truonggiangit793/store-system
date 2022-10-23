@@ -168,7 +168,7 @@
                 "supplierCode": {
                   "example": "any"
                 },
-                "inMoney": {
+                "unitCost": {
                   "example": "any"
                 }
               }

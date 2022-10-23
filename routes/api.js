@@ -253,7 +253,7 @@ Router.post(
                     department: element[3].toUpperCase(),
                     supplierCode: element[4].toUpperCase(),
                     supplierName: supplier ? supplier.supplierName : "Unknown",
-                    inMoney: element[5],
+                    unitCost: element[5] ? element[5] : "0",
                 };
                 let options = { upsert: true, new: true, setDefaultsOnInsert: true };
                 productModel.findOneAndUpdate(query, update, options, function (error, result) {
@@ -276,23 +276,31 @@ Router.post("/products/register", authorization.admin, async (req, res, next) =>
     const UOM = req.body.UOM || null;
     const department = req.body.department || null;
     const supplierCode = req.body.supplierCode || null;
-    const inMoney = req.body.inMoney || null;
+    const unitCost = req.body.unitCost || null;
+
     if (!barcode) return res.json({ status: false, msg: { en: "Product barcode is required!" } });
     if (!productName) return res.json({ status: false, msg: { en: "Product name is required!" } });
     if (!UOM) return res.json({ status: false, msg: { en: "Unit of measure is required!" } });
     if (!department) return res.json({ status: false, msg: { en: "The department is required!" } });
     if (!supplierCode)
         return res.json({ status: false, msg: { en: "Supplier code is required!" } });
-    if (!inMoney || typeof parseInt(inMoney) !== "number")
+
+    var regex =
+        /^([\u20AC]?[1-9]\d*\.\d{3}(?:,\d{2,9})?|[\u20AC]?[1-9]\d*(?:,\d{2,9})?|[\u20AC]?[1-9]\d*)$/;
+
+    if (!unitCost || !regex.test(unitCost))
         return res.json({
             status: false,
             msg: { en: "Price is required and must be a valid value!" },
         });
+
     const productQuery = await productModel.findOne({ barcode });
     if (productQuery)
         return res.json({ status: false, msg: { en: "This product has been already existed!" } });
+
     const supplierQuery = await supplierModel.findOne({ supplierCode });
     if (!supplierQuery) return res.json({ status: false, msg: { en: "Invalid supplier code!" } });
+
     const supplierName = supplierQuery.supplierName;
     const product = new productModel({
         barcode,
@@ -301,7 +309,7 @@ Router.post("/products/register", authorization.admin, async (req, res, next) =>
         department,
         supplierCode,
         supplierName,
-        inMoney: parseInt(inMoney),
+        unitCost,
     });
     product.save();
     return res.json({ status: true, msg: { en: "Created a new product!" }, data: product });

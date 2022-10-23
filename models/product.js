@@ -28,7 +28,7 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: true,
         },
-        inMoney: {
+        unitCost: {
             type: String,
             required: true,
         },
