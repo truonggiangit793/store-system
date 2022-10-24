@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const mongooseDelete = require("mongoose-delete");
+const mongoose = require('mongoose');
+const mongooseDelete = require('mongoose-delete');
 
 const supplierSchema = new mongoose.Schema(
     {
@@ -14,21 +14,21 @@ const supplierSchema = new mongoose.Schema(
         },
         address: {
             type: String,
-            default: "Unknown",
+            default: 'Unknown',
         },
         phoneNumer: {
             type: String,
-            default: "Unknown",
+            default: 'Unknown',
         },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 supplierSchema.plugin(mongooseDelete, {
     deletedAt: true,
-    overrideMethods: "all",
+    overrideMethods: 'all',
 });
 
-module.exports = mongoose.model("Supplier", supplierSchema);
+module.exports = mongoose.model('Supplier', supplierSchema);

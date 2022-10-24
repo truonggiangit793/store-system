@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const mongooseDelete = require("mongoose-delete");
+const mongoose = require('mongoose');
+const mongooseDelete = require('mongoose-delete');
 
 const customerSchema = new mongoose.Schema(
     {
@@ -25,17 +25,17 @@ const customerSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            default: "staff",
+            default: 'staff',
         },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 customerSchema.plugin(mongooseDelete, {
     deletedAt: true,
-    overrideMethods: "all",
+    overrideMethods: 'all',
 });
 
-module.exports = mongoose.model("Customer", customerSchema);
+module.exports = mongoose.model('Customer', customerSchema);

@@ -1,9 +1,9 @@
 const database_uri = process.env.DB_URL;
-const mongoose = require("mongoose");
-const accountModel = require("../models/account");
-const adminConfig = require("../configs/adminConfig");
+const mongoose = require('mongoose');
+const accountModel = require('../models/account');
+const adminConfig = require('../configs/adminConfig');
 
-const query = { userCode: "ADMINISTRATOR" },
+const query = { userCode: 'ADMINISTRATOR' },
     update = adminConfig,
     options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
@@ -12,10 +12,10 @@ const connect = async function () {
     try {
         const options = { useNewUrlParser: true, useUnifiedTopology: true };
         await mongoose.connect(database_uri, options, () => {
-            console.log("✅ Connect to mongoDB successfully!");
+            console.log('✅ Connect to mongoDB successfully!');
         });
     } catch (error) {
-        console.log("❌ Failed to connect to MongoDB!");
+        console.log('❌ Failed to connect to MongoDB!');
         console.log(error.message);
     }
 };
@@ -23,7 +23,7 @@ const connect = async function () {
 // Find the document
 accountModel.findOneAndUpdate(query, update, options, function (error, result) {
     if (error) {
-        console.log("❌ Failed to initial administrator!\n\n");
+        console.log('❌ Failed to initial administrator!\n\n');
         console.log({ error });
         return;
     } else {
@@ -31,7 +31,7 @@ accountModel.findOneAndUpdate(query, update, options, function (error, result) {
         result = !result ? new accountModel() : result;
         // Save the document
         result.save();
-        console.log("✅ Initial administrator account successfully!\n\n");
+        console.log('✅ Initial administrator account successfully!\n\n');
     }
 });
 

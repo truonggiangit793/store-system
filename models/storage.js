@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const mongooseDelete = require("mongoose-delete");
+const mongoose = require('mongoose');
+const mongooseDelete = require('mongoose-delete');
 
 const storageSchema = new mongoose.Schema(
     {
@@ -15,12 +15,12 @@ const storageSchema = new mongoose.Schema(
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 storageSchema.plugin(mongooseDelete, {
     deletedAt: true,
-    overrideMethods: "all",
+    overrideMethods: 'all',
 });
 
-module.exports = mongoose.model("Storage", storageSchema);
+module.exports = mongoose.model('Storage', storageSchema);

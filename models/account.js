@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const mongooseDelete = require("mongoose-delete");
+const mongoose = require('mongoose');
+const mongooseDelete = require('mongoose-delete');
 
 const accountSchema = new mongoose.Schema(
     {
@@ -14,11 +14,11 @@ const accountSchema = new mongoose.Schema(
         },
         email: {
             type: String,
-            default: "#N/A",
+            default: '#N/A',
         },
         phoneNumer: {
             type: String,
-            default: "#N/A",
+            default: '#N/A',
         },
         lastLogin: {
             type: Date,
@@ -30,21 +30,21 @@ const accountSchema = new mongoose.Schema(
         },
         access_token: {
             type: String,
-            default: "#N/A",
+            default: '#N/A',
         },
         role: {
             type: String,
-            default: "STAFF",
+            default: 'STAFF',
         },
     },
     {
         timestamps: true,
-    }
+    },
 );
 
 accountSchema.plugin(mongooseDelete, {
     deletedAt: true,
-    overrideMethods: "all",
+    overrideMethods: 'all',
 });
 
-module.exports = mongoose.model("Account", accountSchema);
+module.exports = mongoose.model('Account', accountSchema);
