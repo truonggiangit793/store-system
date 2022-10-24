@@ -12,7 +12,7 @@ const authorization = {
         }
     },
     admin: async (req, res, next) => {
-        const verified = await authorization.verify(req, res, next, { role: "admin" });
+        const verified = await authorization.verify(req, res, next, { role: "ADMIN" });
         if (verified) return next();
         return res.json({
             status: false,
