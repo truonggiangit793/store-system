@@ -124,16 +124,9 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userCode": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "userCode",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -316,16 +309,9 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "supplierCode": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "supplierCode",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -470,16 +456,9 @@
             "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "barcode": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "barcode",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {

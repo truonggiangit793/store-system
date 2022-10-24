@@ -135,7 +135,7 @@ module.exports = {
     },
     disableAccount: async (req, res, next) => {
         const token = req.query.token || req.headers["x-access-token"];
-        const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
+        const userCode = req.query.userCode ? req.query.userCode.toUpperCase() : null;
         if (!userCode) return res.json({ status: false, msg: { en: "User account is required!" } });
         if (userCode.toUpperCase() == "ADMINISTRATOR")
             return res.json({
@@ -188,7 +188,10 @@ module.exports = {
             return res.json({
                 status: true,
                 message: "Get list of all accounts.",
-                data: accountList,
+                result: {
+                    total: accountList.length,
+                    data: accountList.length > 0 ? accountList : [],
+                },
             });
         } else {
             return res.json({

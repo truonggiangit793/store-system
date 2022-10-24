@@ -157,7 +157,7 @@ module.exports = {
     },
     productDelete: async (req, res, next) => {
         const token = req.query.token || req.headers["x-access-token"];
-        const barcode = req.body.barcode ? req.body.barcode.toUpperCase() : null;
+        const barcode = req.query.barcode ? req.query.barcode.toUpperCase() : null;
         if (!barcode) return res.json({ status: false, msg: { en: "Barcode is required!" } });
 
         const productQuery = await productModel.findOne({ barcode });

@@ -138,7 +138,7 @@ module.exports = {
     supplierDelete: async (req, res, next) => {
         const token = req.query.token || req.headers["x-access-token"];
         let options = { upsert: true, new: true, setDefaultsOnInsert: true };
-        const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
+        const supplierCode = req.query.supplierCode ? req.query.supplierCode.toUpperCase() : null;
         if (!supplierCode)
             return res.json({ status: false, msg: { en: "Supplier code is required!" } });
 
