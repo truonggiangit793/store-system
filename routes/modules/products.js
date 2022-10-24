@@ -99,4 +99,7 @@ module.exports = {
         product.save();
         return res.json({ status: true, msg: { en: "Created a new product!" }, data: product });
     },
+    // getProduct : async (req ,res ,next) => (){
+
+    // }
 };

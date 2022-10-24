@@ -131,4 +131,23 @@ module.exports = {
         newUser.save();
         return res.json({ status: true, msg: { en: "Created a new account!" }, data: newUser });
     },
+    getProfile: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const payload = await jwt.verify(token, process.env.SECRET_KEY);
+        const userCode = payload.data.userCode;
+        const accountQuery = await accountModel.findOne({ userCode });
+        return res.json({
+            status: true,
+            msg: { en: "successfully" },
+            data: {
+                email: accountQuery.email,
+                fullName: accountQuery.fullName,
+                userCode: accountQuery.userCode,
+                phoneNumer: accountQuery.phoneNumer,
+                lastLogin: accountQuery.lastLogin,
+                createdAt: accountQuery.createdAt,
+                updatedAt: accountQuery.updatedAt,
+            },
+        });
+    },
 };
