@@ -12,7 +12,8 @@ const authentication = async (req, res, next) => {
     } catch (error) {
         return res.json({
             status: false,
-            msg: "Error occurred while verifying token!",
+            msg: "Permission denied! Invalid token",
+            err: error,
         });
     }
 };
