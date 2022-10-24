@@ -94,7 +94,7 @@ module.exports = {
             );
             return res.json({
                 status: true,
-                message: "Get list of all accounts.",
+                message: "Get list of all suppliers.",
                 result: {
                     total: resultData.length,
                     data: resultData,

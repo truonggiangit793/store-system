@@ -176,6 +176,7 @@ module.exports = {
                 userCode: accountQuery.userCode,
                 phoneNumer: accountQuery.phoneNumer,
                 lastLogin: accountQuery.lastLogin,
+                role: accountQuery.role,
                 createdAt: accountQuery.createdAt,
                 updatedAt: accountQuery.updatedAt,
             },
