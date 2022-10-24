@@ -1,11 +1,12 @@
 const xlsxFile = require("read-excel-file/node");
 
+const productModel = require("../../models/product");
 const supplierModel = require("../../models/supplier");
 const phoneNumberValidator = require("validate-phone-number-node-js");
 
 module.exports = {
     importSupplier: async (req, res, next) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const token = req.query.token || req.headers["x-access-token"];
         if (!req.file)
             return res.json({ status: false, msg: { en: "Excel file data is required!" } });
         const rows = await xlsxFile(req.file.path);
@@ -48,7 +49,7 @@ module.exports = {
         return res.json({ status: true, msg: { en: "Supplier data synced success!" } });
     },
     supplierRegister: async (req, res, next) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const token = req.query.token || req.headers["x-access-token"];
         const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
         const supplierName = req.body.supplierName || null;
         const address = req.body.address || null;
@@ -72,5 +73,85 @@ module.exports = {
         const supplier = new supplierModel({ supplierCode, supplierName, address, phoneNumber });
         supplier.save();
         return res.json({ status: true, msg: { en: "Created a new supplier!" }, data: supplier });
+    },
+    supplierGetAll: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
+        const supplierList = await supplierModel.find({});
+        if (supplierList.length > 0) {
+            const resultData = await Promise.all(
+                supplierList.map(async (element) => {
+                    const productRefs = await productModel.find({
+                        supplierCode: element.supplierCode,
+                    });
+                    return {
+                        supplier: element,
+                        productRefs: {
+                            total: productRefs.length,
+                            data: productRefs.length > 0 ? productRefs : [],
+                        },
+                    };
+                })
+            );
+            return res.json({
+                status: true,
+                message: "Get list of all accounts.",
+                result: {
+                    total: resultData.length,
+                    data: resultData,
+                },
+            });
+        } else {
+            return res.json({
+                status: false,
+                message: "There is no data!",
+            });
+        }
+    },
+    supplierGetDetail: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
+        const supplierCode = req.query.supplierCode ? req.query.supplierCode.toUpperCase() : null;
+        if (!supplierCode)
+            return res.json({ status: false, msg: { en: "Supplier code is required!" } });
+
+        const supplierQuery = await supplierModel.findOne({ supplierCode });
+        const productRefsList = await productModel.find({ supplierCode });
+
+        if (supplierQuery) {
+            return res.json({
+                status: true,
+                message: "Get detail of supplier.",
+                result: {
+                    supplier: supplierQuery,
+                    productRefs: {
+                        total: productRefsList.length,
+                        data: productRefsList.length > 0 ? productRefsList : [],
+                    },
+                },
+            });
+        } else {
+            return res.json({
+                status: false,
+                message: "Supplier code not found or has been removed!",
+            });
+        }
+    },
+    supplierDelete: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
+        let options = { upsert: true, new: true, setDefaultsOnInsert: true };
+        const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
+        if (!supplierCode)
+            return res.json({ status: false, msg: { en: "Supplier code is required!" } });
+
+        const supplierQuery = await supplierModel.findOne({ supplierCode });
+
+        if (!supplierQuery)
+            return res.json({
+                status: false,
+                msg: { en: "Invalid supplier code, supplier code not found!" },
+            });
+
+        await supplierModel.remove({ supplierCode });
+        await productModel.deleteMany({ supplierCode });
+        res.json({ status: true, msg: { en: "Supplier has been removed!" } });
     },
 };

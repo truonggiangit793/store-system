@@ -5,7 +5,7 @@ const supplierModel = require("../../models/supplier");
 
 module.exports = {
     productImport: async (req, res, next) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const token = req.query.token || req.headers["x-access-token"];
         if (!req.file)
             return res.json({ status: false, msg: { en: "Excel file data is required!" } });
         const rows = await xlsxFile(req.file.path);
@@ -50,7 +50,7 @@ module.exports = {
         return res.json({ status: true, msg: { en: "Master products data synced success!" } });
     },
     productRegister: async (req, res, next) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const token = req.query.token || req.headers["x-access-token"];
         const barcode = req.body.barcode ? req.body.barcode.toUpperCase() : null;
         const productName = req.body.productName || null;
         const UOM = req.body.UOM || null;
@@ -101,7 +101,74 @@ module.exports = {
         product.save();
         return res.json({ status: true, msg: { en: "Created a new product!" }, data: product });
     },
-    // getProduct : async (req ,res ,next) => (){
+    productGetDetail: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
+        const barcode = req.query.barcode ? req.query.barcode.toUpperCase() : null;
+        if (!barcode)
+            return res.json({ status: false, msg: { en: "Product barcode is required!" } });
 
-    // }
+        const productQuery = await productModel.findOne({ barcode });
+
+        if (productQuery) {
+            const supplierQuery = await supplierModel.findOne({
+                supplierCode: productQuery.supplierCode,
+            });
+            const productRefsList = await productModel.find({
+                supplierCode: productQuery.supplierCode,
+            });
+            return res.json({
+                status: true,
+                msg: { en: "Get product details!" },
+                result: {
+                    data: productQuery,
+                    related: {
+                        supplier: supplierQuery,
+                        productRefs: {
+                            total: productRefsList.length,
+                            data: productRefsList.length > 0 ? productRefsList : [],
+                        },
+                    },
+                },
+            });
+        } else {
+            return res.json({
+                status: false,
+                msg: {
+                    en: "Product not found or has been removed, contact developer for more detail!",
+                },
+            });
+        }
+    },
+    productGetAll: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
+        const productList = await productModel.find({});
+        if (productList.length > 0) {
+            return res.json({
+                status: true,
+                msg: { en: "Get list of all products!" },
+                result: {
+                    total: productList.length,
+                    data: productList.length > 0 ? productList : [],
+                },
+            });
+        } else {
+            return res.json({ status: false, msg: { en: "There is no data!" } });
+        }
+    },
+    productDelete: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
+        const barcode = req.body.barcode ? req.body.barcode.toUpperCase() : null;
+        if (!barcode) return res.json({ status: false, msg: { en: "Barcode is required!" } });
+
+        const productQuery = await productModel.findOne({ barcode });
+
+        if (!productQuery)
+            return res.json({
+                status: false,
+                msg: { en: "Invalid supplier code, supplier code not found!" },
+            });
+
+        await productModel.deleteOne({ barcode });
+        res.json({ status: true, msg: { en: "Product has been removed!" } });
+    },
 };

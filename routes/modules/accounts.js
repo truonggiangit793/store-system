@@ -33,7 +33,7 @@ module.exports = {
         return res.json({ status: true, msg: { en: "Login successfully!" }, token: jwtSignature });
     },
     importAccount: async (req, res, next) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const token = req.query.token || req.headers["x-access-token"];
         if (!req.file)
             return res.json({ status: false, msg: { en: "Excel file data is required!" } });
         const rows = await xlsxFile(req.file.path);
@@ -89,7 +89,7 @@ module.exports = {
         return res.json({ status: true, msg: { en: "Account data synced success!" } });
     },
     registerAccount: async (req, res, next) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const token = req.query.token || req.headers["x-access-token"];
         const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
         const fullName = req.body.fullName || null;
         const email = req.body.email || null;
@@ -163,7 +163,7 @@ module.exports = {
         return res.json({ status: true, msg: { en: "Account has been disabled!" } });
     },
     getProfile: async (req, res, next) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const token = req.query.token || req.headers["x-access-token"];
         const payload = await jwt.verify(token, process.env.SECRET_KEY);
         const userCode = payload.data.userCode;
         const accountQuery = await accountModel.findOne({ userCode });
@@ -181,8 +181,8 @@ module.exports = {
             },
         });
     },
-    getAll: async (req, res, next) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+    accountGetAll: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
         const accountList = await accountModel.find({});
         if (accountList.length > 0) {
             return res.json({

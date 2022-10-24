@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const authorization = {
     verify: async (req, res, next, { role }) => {
-        const token = req.body.token || req.query.token || req.headers["x-access-token"] || null;
+        const token = req.query.token || req.headers["x-access-token"] || null;
         try {
             const payload = await jwt.verify(token, process.env.SECRET_KEY);
             if (payload.data && payload.data.role == role) return true;

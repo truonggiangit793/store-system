@@ -9,10 +9,25 @@ const {
     registerAccount,
     getProfile,
     disableAccount,
-    getAll,
+    accountGetAll,
 } = require("./modules/accounts");
-const { importSupplier, supplierRegister } = require("./modules/suppliers");
-const { productImport, productRegister } = require("./modules/products");
+
+const {
+    importSupplier,
+    supplierRegister,
+    supplierDelete,
+    supplierGetAll,
+    supplierGetDetail,
+} = require("./modules/suppliers");
+
+const {
+    productImport,
+    productRegister,
+    productGetDetail,
+    productGetAll,
+    productDelete,
+} = require("./modules/products");
+
 const downloadExample = require("./modules/download_example");
 
 Router.post("/login", login);
@@ -25,15 +40,27 @@ Router.delete("/account/disable", authorization.admin, disableAccount);
 
 Router.get("/account/me", authentication, getProfile);
 
-Router.get("/account/get-all", authorization.admin, getAll);
+Router.get("/account/get-all", authorization.admin, accountGetAll);
 
 Router.post("/supplier/import", authorization.admin, multer.supplierImport, importSupplier);
 
 Router.post("/supplier/register", authorization.admin, supplierRegister);
 
+Router.get("/supplier/get-detail", authorization.admin, supplierGetDetail);
+
+Router.get("/supplier/get-all", authorization.admin, supplierGetAll);
+
+Router.delete("/supplier/delete", authorization.admin, supplierDelete);
+
 Router.post("/products/import", authorization.admin, multer.productImport, productImport);
 
 Router.post("/products/register", authorization.admin, productRegister);
+
+Router.get("/products/get-detail", authentication, productGetDetail);
+
+Router.get("/products/get-all", authentication, productGetAll);
+
+Router.delete("/products/delete", authentication, productDelete);
 
 Router.get(
     "/file/download-example-account",
