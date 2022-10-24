@@ -22,7 +22,10 @@ app.use(express.static(path.join(__dirname, "client")));
 
 const outputFile = "./services/swagger_output.json";
 const endpointsFiles = ["./routes/api.js"];
-swaggerAutogen(outputFile, endpointsFiles);
+const doc = {
+    host: `localhost:${process.env.PORT}/api/v1`, // by default: 'localhost:3000'
+};
+swaggerAutogen(outputFile, endpointsFiles, doc);
 
 // Define routes end point
 defineRoute(app);
