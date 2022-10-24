@@ -33,6 +33,7 @@ module.exports = {
         return res.json({ status: true, msg: { en: "Login successfully!" }, token: jwtSignature });
     },
     importAccount: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
         if (!req.file)
             return res.json({ status: false, msg: { en: "Excel file data is required!" } });
         const rows = await xlsxFile(req.file.path);
@@ -88,6 +89,7 @@ module.exports = {
         return res.json({ status: true, msg: { en: "Account data synced success!" } });
     },
     registerAccount: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
         const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
         const fullName = req.body.fullName || null;
         const email = req.body.email || null;
@@ -131,6 +133,35 @@ module.exports = {
         newUser.save();
         return res.json({ status: true, msg: { en: "Created a new account!" }, data: newUser });
     },
+    disableAccount: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
+        const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
+        if (!userCode) return res.json({ status: false, msg: { en: "User account is required!" } });
+        if (userCode.toUpperCase() == "ADMINISTRATOR")
+            return res.json({
+                status: false,
+                msg: { en: "Permission denied! This is ADMIN account!" },
+            });
+        const accountQuery = await accountModel.findOne({ userCode: userCode.toUpperCase() });
+        if (!accountQuery)
+            return res.json({ status: false, msg: { en: "This account does not exist!" } });
+        let query = { userCode: userCode.toUpperCase() };
+        let options = { upsert: true, new: true, setDefaultsOnInsert: true };
+        accountModel.findOneAndUpdate(query, { deleted: true }, options, function (error, result) {
+            if (error) {
+                return res.json({
+                    status: false,
+                    msg: { en: "Failed! An error occured, please try again!" },
+                });
+            } else {
+                // If the document doesn't exist
+                result = !result ? new accountModel() : result;
+                // Save the document
+                result.save();
+            }
+        });
+        return res.json({ status: true, msg: { en: "Account has been disabled!" } });
+    },
     getProfile: async (req, res, next) => {
         const token = req.body.token || req.query.token || req.headers["x-access-token"];
         const payload = await jwt.verify(token, process.env.SECRET_KEY);
@@ -149,5 +180,21 @@ module.exports = {
                 updatedAt: accountQuery.updatedAt,
             },
         });
+    },
+    getAll: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
+        const accountList = await accountModel.find({});
+        if (accountList.length > 0) {
+            return res.json({
+                status: true,
+                message: "Get list of all accounts.",
+                data: accountList,
+            });
+        } else {
+            return res.json({
+                status: false,
+                message: "There is no data!",
+            });
+        }
     },
 };

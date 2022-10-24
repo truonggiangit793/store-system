@@ -3,7 +3,14 @@ const authorization = require("../middlewares/authorization");
 const authentication = require("../middlewares/authentication");
 const multer = require("../services/multer");
 
-const { login, importAccount, registerAccount, getProfile } = require("./modules/accounts");
+const {
+    login,
+    importAccount,
+    registerAccount,
+    getProfile,
+    disableAccount,
+    getAll,
+} = require("./modules/accounts");
 const { importSupplier, supplierRegister } = require("./modules/suppliers");
 const { productImport, productRegister } = require("./modules/products");
 const downloadExample = require("./modules/download_example");
@@ -14,7 +21,11 @@ Router.post("/account/import", authorization.admin, multer.accountImport, import
 
 Router.post("/account/register", authorization.admin, registerAccount);
 
+Router.delete("/account/disable", authorization.admin, disableAccount);
+
 Router.get("/account/me", authentication, getProfile);
+
+Router.get("/account/get-all", authorization.admin, getAll);
 
 Router.post("/supplier/import", authorization.admin, multer.supplierImport, importSupplier);
 

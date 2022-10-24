@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const accountModel = require("../models/account");
 const adminConfig = require("../configs/adminConfig");
 
-const query = { email: "admin@example.com" },
+const query = { userCode: "ADMINISTRATOR" },
     update = adminConfig,
     options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
@@ -27,6 +27,10 @@ accountModel.findOneAndUpdate(query, update, options, function (error, result) {
         console.log({ error });
         return;
     } else {
+        // If the document doesn't exist
+        result = !result ? new accountModel() : result;
+        // Save the document
+        result.save();
         console.log("✅ Initial administrator account successfully!\n\n");
     }
 });

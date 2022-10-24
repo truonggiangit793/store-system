@@ -5,6 +5,7 @@ const phoneNumberValidator = require("validate-phone-number-node-js");
 
 module.exports = {
     importSupplier: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
         if (!req.file)
             return res.json({ status: false, msg: { en: "Excel file data is required!" } });
         const rows = await xlsxFile(req.file.path);
@@ -47,6 +48,7 @@ module.exports = {
         return res.json({ status: true, msg: { en: "Supplier data synced success!" } });
     },
     supplierRegister: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
         const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
         const supplierName = req.body.supplierName || null;
         const address = req.body.address || null;

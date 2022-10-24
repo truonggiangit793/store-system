@@ -28,6 +28,7 @@ const pipFileStream = (res) => {
 
 module.exports = {
     downloadAccountExample: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
         worksheet.cell(1, 1).string("User Code").style(titleStyle);
         worksheet.cell(1, 2).string("Fullname").style(titleStyle);
         worksheet.cell(1, 3).string("Email").style(titleStyle);
@@ -37,6 +38,7 @@ module.exports = {
         pipFileStream(res);
     },
     downloadSupplierExample: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
         worksheet.cell(1, 1).string("Supplier Code").style(titleStyle);
         worksheet.cell(1, 2).string("Supplier Name").style(titleStyle);
         worksheet.cell(1, 3).string("Adress").style(titleStyle);
@@ -44,6 +46,7 @@ module.exports = {
         pipFileStream(res);
     },
     downloadProductExample: async (req, res, next) => {
+        const token = req.body.token || req.query.token || req.headers["x-access-token"];
         worksheet.cell(1, 1).string("Barcode").style(titleStyle);
         worksheet.cell(1, 2).string("Product Name").style(titleStyle);
         worksheet.cell(1, 3).string("UOM").style(titleStyle);
