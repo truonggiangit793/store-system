@@ -12,8 +12,11 @@ const authentication = async (req, res, next) => {
     } catch (error) {
         return res.json({
             status: false,
-            msg: "Permission denied! Invalid token",
-            err: error,
+            msg: "Permission denied!",
+            err: {
+                name: "Params error",
+                message: "Token must be provied.",
+            },
         });
     }
 };
