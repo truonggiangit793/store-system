@@ -14,7 +14,7 @@ module.exports = {
             rows[0][2].toUpperCase() !== "UOM" ||
             rows[0][3].toUpperCase() !== "DEPARTMENT" ||
             rows[0][4].toUpperCase() !== "SUPPLIER CODE" ||
-            rows[0][5].toUpperCase() !== "PRICE";
+            rows[0][5].toUpperCase() !== "UNIT COST";
 
         if (invalidFormat)
             return res.json({
