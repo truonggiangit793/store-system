@@ -5,7 +5,8 @@
     "scripts": {
         "start": "node ./bin/www",
         "dev": "nodemon ./bin/www",
-        "format": "prettier --single-quote --trailing-comma all --write --tab-width 4 '**/*.js'"
+        "format": "prettier --single-quote --trailing-comma all --write --tab-width 4 '**/*.js'",
+        "prepare": "husky install"
     },
     "dependencies": {
         "bcrypt": "^5.0.1",
@@ -49,7 +50,6 @@
     "lint-staged": {
         "*.{js}": [
             "prettier --single-quote --trailing-comma all --write --tab-width 4 '**/*.js'",
-            "eslint --fix",
             "git add"
         ]
     }
