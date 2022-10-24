@@ -34,7 +34,7 @@ const accountSchema = new mongoose.Schema(
         },
         role: {
             type: String,
-            default: "staff",
+            default: "STAFF",
         },
     },
     {

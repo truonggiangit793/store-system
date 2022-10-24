@@ -6,6 +6,6 @@ module.exports = {
     userCode: "ADMINISTRATOR",
     fullName: "ADMINISTRATOR",
     password: hashPassword,
-    role: "admin",
+    role: "ADMIN",
     email: "admin@example.com",
 };
