@@ -187,8 +187,8 @@ module.exports = {
                 msg: { en: 'Account has been already existed!' },
             });
         const newUser = new accountModel({
-            userCode,
-            fullName,
+            userCode: userCode.toUpperCase(),
+            fullName: fullName.toUpperCase,
             email,
             phoneNumber,
             password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
@@ -309,6 +309,67 @@ module.exports = {
         return res.json({
             status: true,
             message: 'Updated information successfully!',
+        });
+    },
+    accountChangePassword: async (req, res, next) => {
+        const token = req.query.token || req.headers['x-access-token'];
+        const payload = await jwt.verify(token, process.env.SECRET_KEY);
+        const oldPassword = req.body.oldPassword || null;
+        const newPassword = req.body.newPassword || null;
+        const repeatPassword = req.body.repeatPassword || null;
+        const accountQuery = await accountModel.findOne({
+            userCode: payload.data.userCode,
+        });
+
+        if (!oldPassword)
+            return res.json({
+                status: false,
+                msg: { en: 'Old password is required.' },
+            });
+        if (!newPassword)
+            return res.json({
+                status: false,
+                msg: { en: 'New password is required.' },
+            });
+        if (!repeatPassword)
+            return res.json({
+                status: false,
+                msg: { en: 'Repeat password is required.' },
+            });
+
+        if (newPassword !== repeatPassword)
+            return res.json({
+                status: false,
+                msg: { en: 'Password does not match!' },
+            });
+
+        const validPassword = bcrypt.compareSync(
+            oldPassword,
+            accountQuery.password,
+        );
+        if (!validPassword)
+            return res.json({
+                status: false,
+                msg: { en: 'Invalid password!' },
+            });
+        jwt.destroy;
+        const jwtSignature = jwt.sign(
+            {
+                // Set the expiration upto 1 days
+                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+                data: {
+                    userCode: accountQuery.userCode,
+                    role: accountQuery.role,
+                    fullname: `${accountQuery.fullName}`,
+                },
+            },
+            process.env.SECRET_KEY,
+        );
+        accountQuery.access_token = jwtSignature;
+        return res.json({
+            status: true,
+            msg: { en: 'Login successfully!' },
+            token: jwtSignature,
         });
     },
     accountGetAll: async (req, res, next) => {

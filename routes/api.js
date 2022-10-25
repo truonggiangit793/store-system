@@ -11,6 +11,7 @@ const {
     disableAccount,
     accountGetAll,
     accountUpdateMe,
+    accountChangePassword,
 } = require('./modules/accounts');
 
 const {
@@ -47,6 +48,8 @@ Router.delete('/account/disable', authorization.admin, disableAccount);
 Router.get('/account/me', authentication, getProfile);
 
 Router.put('/account/update-me', authentication, accountUpdateMe);
+
+Router.patch('/account/change-password', authentication, accountChangePassword);
 
 Router.get('/account/get-all', authorization.admin, accountGetAll);
 
