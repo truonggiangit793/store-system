@@ -39,8 +39,8 @@ module.exports = {
             });
         const jwtSignature = jwt.sign(
             {
-                // Set the expiration upto 30 days
-                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 30,
+                // Set the expiration upto 1 days
+                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
                 data: {
                     userCode: accountQuery.userCode,
                     role: accountQuery.role,
