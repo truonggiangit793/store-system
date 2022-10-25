@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const accountModel = require('../models/account');
 const adminConfig = require('../configs/adminConfig');
 
-const query = { userCode: 'ADMINISTRATOR' },
+const query = { userCode: adminConfig.userCode },
     update = adminConfig,
     options = { upsert: true, new: true, setDefaultsOnInsert: true };
 
@@ -23,8 +23,8 @@ const connect = async function () {
 // Find the document
 accountModel.findOneAndUpdate(query, update, options, function (error, result) {
     if (error) {
-        console.log('❌ Failed to initial administrator!\n\n');
-        console.log({ error });
+        console.log('❌ Failed to initial administrator!\n');
+        console.error(`❌ Error: ${error.message}`);
         return;
     } else {
         // If the document doesn't exist

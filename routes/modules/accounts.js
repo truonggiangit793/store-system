@@ -271,6 +271,46 @@ module.exports = {
             },
         });
     },
+    accountUpdateMe: async (req, res, next) => {
+        const token = req.query.token || req.headers['x-access-token'];
+        const payload = await jwt.verify(token, process.env.SECRET_KEY);
+        const accountQuery = await accountModel.findOne({
+            userCode: payload.data.userCode,
+        });
+        const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+        const query = { userCode: payload.data.userCode.toUpperCase() };
+        let update = {
+            email: req.body.email || accountQuery.email,
+            fullName: req.body.fullName
+                ? req.body.fullName.toUpperCase()
+                : null || accountQuery.fullName,
+            phoneNumer: req.body.phoneNumber || accountQuery.phoneNumer,
+        };
+        accountModel.findOneAndUpdate(
+            query,
+            update,
+            options,
+            function (error, result) {
+                if (error) {
+                    return res.json({
+                        status: false,
+                        msg: {
+                            en: 'Failed! An error occured, please try again!',
+                        },
+                    });
+                } else {
+                    // If the document doesn't exist
+                    result = !result ? new accountModel() : result;
+                    // Save the document
+                    result.save();
+                }
+            },
+        );
+        return res.json({
+            status: true,
+            message: 'Updated information successfully!',
+        });
+    },
     accountGetAll: async (req, res, next) => {
         const token = req.query.token || req.headers['x-access-token'];
         const accountList = await accountModel.find({});
