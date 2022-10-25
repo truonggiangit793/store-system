@@ -49,7 +49,11 @@ module.exports = {
             },
             process.env.SECRET_KEY,
         );
-        accountQuery.access_token = jwtSignature;
+        await accountModel.findOneAndUpdate(
+            { userCode },
+            { access_token: jwtSignature },
+        );
+        // accountQuery.access_token = jwtSignature;
         return res.json({
             status: true,
             msg: { en: 'Login successfully!' },
@@ -326,15 +330,19 @@ module.exports = {
                 status: false,
                 msg: { en: 'Old password is required.' },
             });
-        if (!newPassword)
+        if (!newPassword || newPassword.length < 6)
             return res.json({
                 status: false,
-                msg: { en: 'New password is required.' },
+                msg: {
+                    en: 'New password is required and must be at least 6 characters.',
+                },
             });
-        if (!repeatPassword)
+        if (!repeatPassword || repeatPassword.length < 6)
             return res.json({
                 status: false,
-                msg: { en: 'Repeat password is required.' },
+                msg: {
+                    en: 'Repeat password is required and must be at least 6 characters.',
+                },
             });
 
         if (newPassword !== repeatPassword)
@@ -352,7 +360,6 @@ module.exports = {
                 status: false,
                 msg: { en: 'Invalid password!' },
             });
-        jwt.destroy;
         const jwtSignature = jwt.sign(
             {
                 // Set the expiration upto 1 days
@@ -365,10 +372,16 @@ module.exports = {
             },
             process.env.SECRET_KEY,
         );
-        accountQuery.access_token = jwtSignature;
+        // const options = { upsert: true, new: true, setDefaultsOnInsert: true };
+        const query = { userCode: accountQuery.userCode.toUpperCase() };
+        let update = {
+            password: bcrypt.hashSync(repeatPassword, bcrypt.genSaltSync(10)),
+            access_token: jwtSignature,
+        };
+        await accountModel.findOneAndUpdate(query, update);
         return res.json({
             status: true,
-            msg: { en: 'Login successfully!' },
+            msg: { en: 'Password has been updated successfully!' },
             token: jwtSignature,
         });
     },

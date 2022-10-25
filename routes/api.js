@@ -36,14 +36,25 @@ Router.post('/login', login);
 
 Router.post(
     '/account/import',
+    authentication,
     authorization.admin,
     multer.accountImport,
     importAccount,
 );
 
-Router.post('/account/register', authorization.admin, registerAccount);
+Router.post(
+    '/account/register',
+    authentication,
+    authorization.admin,
+    registerAccount,
+);
 
-Router.delete('/account/disable', authorization.admin, disableAccount);
+Router.delete(
+    '/account/disable',
+    authentication,
+    authorization.admin,
+    disableAccount,
+);
 
 Router.get('/account/me', authentication, getProfile);
 
@@ -51,31 +62,63 @@ Router.put('/account/update-me', authentication, accountUpdateMe);
 
 Router.patch('/account/change-password', authentication, accountChangePassword);
 
-Router.get('/account/get-all', authorization.admin, accountGetAll);
+Router.get(
+    '/account/get-all',
+    authentication,
+    authorization.admin,
+    accountGetAll,
+);
 
 Router.post(
     '/supplier/import',
+    authentication,
     authorization.admin,
     multer.supplierImport,
     importSupplier,
 );
 
-Router.post('/supplier/register', authorization.admin, supplierRegister);
+Router.post(
+    '/supplier/register',
+    authentication,
+    authorization.admin,
+    supplierRegister,
+);
 
-Router.get('/supplier/get-detail', authorization.admin, supplierGetDetail);
+Router.get(
+    '/supplier/get-detail',
+    authentication,
+    authorization.admin,
+    supplierGetDetail,
+);
 
-Router.get('/supplier/get-all', authorization.admin, supplierGetAll);
+Router.get(
+    '/supplier/get-all',
+    authentication,
+    authorization.admin,
+    supplierGetAll,
+);
 
-Router.delete('/supplier/delete', authorization.admin, supplierDelete);
+Router.delete(
+    '/supplier/delete',
+    authentication,
+    authorization.admin,
+    supplierDelete,
+);
 
 Router.post(
     '/products/import',
+    authentication,
     authorization.admin,
     multer.productImport,
     productImport,
 );
 
-Router.post('/products/register', authorization.admin, productRegister);
+Router.post(
+    '/products/register',
+    authentication,
+    authorization.admin,
+    productRegister,
+);
 
 Router.get('/products/get-detail', authentication, productGetDetail);
 
