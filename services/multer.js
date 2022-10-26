@@ -32,7 +32,7 @@ module.exports = function (req, res, next) {
 
     upload(req, res, (err) => {
         if (err) {
-            return res.status(200).json({ status: false, statusCode: 200, msg: err.message });
+            return res.status(500).json({ status: false, statusCode: 500, msg: err.message });
         } else {
             const fileUpload = req.file || null;
             if (!fileUpload) {
