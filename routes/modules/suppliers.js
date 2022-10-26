@@ -1,104 +1,91 @@
-const xlsxFile = require('read-excel-file/node');
+const xlsxFile = require("read-excel-file/node");
 
-const productModel = require('../../models/product');
-const supplierModel = require('../../models/supplier');
-const phoneNumberValidator = require('validate-phone-number-node-js');
+const productModel = require("../../models/product");
+const supplierModel = require("../../models/supplier");
+const phoneNumberValidator = require("validate-phone-number-node-js");
 
 module.exports = {
-    importSupplier: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        if (!req.file)
-            return res.json({
-                status: false,
-                msg: { en: 'Excel file data is required!' },
-            });
+    supplierImport: async (req, res, next) => {
         const rows = await xlsxFile(req.file.path);
-        const invalidFormat =
-            rows[0][0].toUpperCase() !== 'SUPPLIER CODE' ||
-            rows[0][1].toUpperCase() !== 'SUPPLIER NAME' ||
-            rows[0][2].toUpperCase() !== 'ADDRESS' ||
-            rows[0][3].toUpperCase() !== 'PHONE NUMBER';
-        if (invalidFormat)
-            return res.json({
+        if (
+            rows[0][0].toUpperCase() !== "SUPPLIER CODE" ||
+            rows[0][1].toUpperCase() !== "SUPPLIER NAME" ||
+            rows[0][2].toUpperCase() !== "ADDRESS" ||
+            rows[0][3].toUpperCase() !== "PHONE NUMBER"
+        )
+            return res.status(200).json({
                 status: false,
-                msg: { en: `Invalid format excel file!` },
+                statusCode: 200,
+                msg: { en: "Invalid format excel file.", vn: "Tập tin excel không đúng cấu trúc." },
             });
         rows.forEach((element, index) => {
             if (index > 0) {
-                let query = { supplierCode: element[0] };
-                let options = {
-                    upsert: true,
-                    new: true,
-                    setDefaultsOnInsert: true,
-                };
-                let update = {
-                    supplierCode: element[0].toUpperCase(),
-                    supplierName: element[1].toUpperCase(),
-                    address: element[2],
-                    phoneNumber: element[3],
-                };
                 supplierModel.findOneAndUpdate(
-                    query,
-                    update,
-                    options,
-                    function (error, result) {
-                        if (error) {
-                            return res.json({
-                                status: false,
-                                msg: {
-                                    en: 'Failed! An error occured, please try again!',
-                                },
-                            });
-                        } else {
-                            // If the document doesn't exist
-                            result = !result ? new supplierModel() : result;
-                            // Save the document
-                            result.save();
-                        }
+                    { supplierCode: element[0] },
+                    {
+                        supplierCode: element[0].toUpperCase(),
+                        supplierName: element[1].toUpperCase(),
+                        address: element[2],
+                        phoneNumber: element[3],
                     },
+                    {
+                        upsert: true,
+                        new: true,
+                        setDefaultsOnInsert: true,
+                    }
                 );
             }
         });
-        return res.json({
+        return res.status(200).json({
             status: true,
-            msg: { en: 'Supplier data synced success!' },
+            statusCode: 200,
+            msg: {
+                en: "All suppliers has been import successfully!",
+                vn: "Đã nhập danh sách nhà cung cấp thành công!",
+            },
         });
     },
     supplierRegister: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        const supplierCode = req.body.supplierCode
-            ? req.body.supplierCode.toUpperCase()
-            : null;
-        const supplierName = req.body.supplierName || null;
+        const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
+        const supplierName = req.body.supplierName ? req.body.supplierName.topUpperCase() : null;
         const address = req.body.address || null;
         const phoneNumber = req.body.phoneNumber || null;
+        const supplierQuery = await supplierModel.findOne({ supplierCode });
         if (!supplierCode)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Supplier code is required!' },
+                statusCode: 200,
+                msg: { en: "Supplier code is required!", vn: "Mã nhà cung cấp là bắt buộc." },
             });
         if (!supplierName)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Supplier name is required!' },
+                statusCode: 200,
+                msg: { en: "Supplier name is required!", vn: "Tên nhà cung cấp là bắt buộc." },
             });
         if (!address)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Address is required!' },
+                statusCode: 200,
+                msg: { en: "Address is required!", vn: "Địa chỉ là bắt buộc." },
             });
         if (!phoneNumber || !phoneNumberValidator.validate(phoneNumber))
-            return res.json({
+            return res.status(200).json({
                 status: false,
+                statusCode: 200,
                 msg: {
-                    en: 'Phone number is required and must be a valid phone number!',
+                    en: "Phone number is required and must be a valid phone number!",
+                    vn: "Số điện thoại là bắt buộc và phải là số điện thoại hợp lệ.",
                 },
             });
-        const supplierQuery = await supplierModel.findOne({ supplierCode });
         if (supplierQuery)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Supplier code has been already existed!' },
+                statusCode: 200,
+                msg: {
+                    en: `Supplier code "${supplierCode}" has been already existed!`,
+                    vn: `Mã nhà cung cấp "${supplierCode}" đã tồn tại.`,
+                },
             });
         const supplier = new supplierModel({
             supplierCode,
@@ -107,14 +94,16 @@ module.exports = {
             phoneNumber,
         });
         supplier.save();
-        return res.json({
+        return res.status(200).json({
             status: true,
-            msg: { en: 'Created a new supplier!' },
-            data: supplier,
+            statusCode: 200,
+            msg: {
+                en: `Supplier code "${supplierCode}" has been registered successfully!`,
+                vn: `Mã nhà cung cấp "${supplierCode}" đã được tạo thành công.`,
+            },
         });
     },
     supplierGetAll: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
         const supplierList = await supplierModel.find({});
         if (supplierList.length > 0) {
             const resultData = await Promise.all(
@@ -129,39 +118,44 @@ module.exports = {
                             data: productRefs.length > 0 ? productRefs : [],
                         },
                     };
-                }),
+                })
             );
-            return res.json({
+            return res.status(200).json({
                 status: true,
-                message: 'Get list of all suppliers.',
+                statusCode: 200,
+                msg: { en: "Get list of all suppliers.", vn: "Danh sách tất cả nhà cung cấp." },
                 result: {
                     total: resultData.length,
                     data: resultData,
                 },
             });
         } else {
-            return res.json({
-                status: false,
-                message: 'There is no data!',
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: { en: "There is no data.", vn: "Danh sách trống, không có dữ liệu nào." },
+                result: [],
             });
         }
     },
     supplierGetDetail: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        const supplierCode = req.query.supplierCode
-            ? req.query.supplierCode.toUpperCase()
-            : null;
-        if (!supplierCode)
-            return res.json({
-                status: false,
-                msg: { en: 'Supplier code is required!' },
-            });
+        const supplierCode = req.query.supplierCode ? req.query.supplierCode.toUpperCase() : null;
         const supplierQuery = await supplierModel.findOne({ supplierCode });
         const productRefsList = await productModel.find({ supplierCode });
+        if (!supplierCode)
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: { en: "Supplier code is required!", vn: "Mã nhà cung cấp là bắt buộc." },
+            });
         if (supplierQuery) {
-            return res.json({
+            return res.status(200).json({
                 status: true,
-                message: 'Get detail of supplier.',
+                statusCode: 200,
+                msg: {
+                    en: `Detail of supplier "${supplierQuery.supplierName}".`,
+                    vn: `Thông tin chi tiết của nhà cung cấp "${supplierQuery.supplierName}".`,
+                },
                 result: {
                     supplier: supplierQuery,
                     productRefs: {
@@ -171,30 +165,43 @@ module.exports = {
                 },
             });
         } else {
-            return res.json({
+            return res.status(404).json({
                 status: false,
-                message: 'Supplier code not found or has been removed!',
+                statusCode: 404,
+                msg: {
+                    en: `Supplier code "${supplierCode}" not found or has been removed, contact developer for more detail!`,
+                    vn: `Không tìm thấy mã nhà cung cấp "${supplierCode}" hoặc đã bị gỡ bỏ, vui lòng liên hệ quản trị viên.`,
+                },
             });
         }
     },
     supplierDelete: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        const supplierCode = req.query.supplierCode
-            ? req.query.supplierCode.toUpperCase()
-            : null;
-        if (!supplierCode)
-            return res.json({
-                status: false,
-                msg: { en: 'Supplier code is required!' },
-            });
+        const supplierCode = req.query.supplierCode ? req.query.supplierCode.toUpperCase() : null;
         const supplierQuery = await supplierModel.findOne({ supplierCode });
-        if (!supplierQuery)
-            return res.json({
+        if (!supplierCode)
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Invalid supplier code, supplier code not found!' },
+                statusCode: 200,
+                msg: { en: "Supplier code is required!", vn: "Mã nhà cung cấp là bắt buộc." },
+            });
+        if (!supplierQuery)
+            return res.status(404).json({
+                status: false,
+                statusCode: 404,
+                msg: {
+                    en: `Supplier code "${supplierCode}" not found or has been removed, contact developer for more detail!`,
+                    vn: `Không tìm thấy mã nhà cung cấp "${supplierCode}" hoặc đã bị gỡ bỏ, vui lòng liên hệ quản trị viên.`,
+                },
             });
         await supplierModel.remove({ supplierCode });
         await productModel.deleteMany({ supplierCode });
-        res.json({ status: true, msg: { en: 'Supplier has been removed!' } });
+        return res.status(200).json({
+            status: true,
+            statusCode: 200,
+            msg: {
+                en: `Supplier code "${supplierCode}" has been removed successfully!`,
+                vn: `Mã nhà cung cấp "${supplierCode}" đã được gỡ bỏ thành công.`,
+            },
+        });
     },
 };

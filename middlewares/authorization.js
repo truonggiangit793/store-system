@@ -1,24 +1,29 @@
-const jwt = require('jsonwebtoken');
+const jwt = require("jsonwebtoken");
 const authorization = {
-    verify: async (req, res, next, { role }) => {
-        const token = req.query.token || req.headers['x-access-token'] || null;
-        try {
-            const payload = await jwt.verify(token, process.env.SECRET_KEY);
-            if (payload.data && payload.data.role == role) return true;
-            return false;
-        } catch (error) {
-            console.log(error);
-            return false;
-        }
-    },
     admin: async (req, res, next) => {
-        const verified = await authorization.verify(req, res, next, {
-            role: 'ADMIN',
-        });
-        if (verified) return next();
-        return res.json({
-            status: false,
-            msg: 'Permission denied! Only admin is allowed to access this enpoint!',
+        const token = req.query.token || req.headers["x-access-token"] || null;
+        jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
+            if (error) {
+                console.log("\x1b[31m%s\x1b[0m", error);
+                return res.status(500).json({
+                    status: false,
+                    statusCode: 500,
+                    error: error.message,
+                });
+            } else {
+                console.log("\x1b[36m%s\x1b[0m", "authorization", { payload });
+                if (payload.data.role ? payload.data.role.toUpperCase() : null == "ADMIN") {
+                    return next();
+                } else {
+                    return res.status(401).json({
+                        status: false,
+                        msg: {
+                            en: "Permission denied! Only admin is allowed to access this enpoint!",
+                            vn: "Bạn không có quyền truy cập. Vui lòng liên hệ quản trị viên!",
+                        },
+                    });
+                }
+            }
         });
     },
 };

@@ -4,14 +4,7 @@
     "private": true,
     "scripts": {
         "start": "node ./bin/www",
-        "dev": "nodemon ./bin/www",
-        "format": "prettier --single-quote --trailing-comma all --write --tab-width 4 '**/*.js'",
-        "prepare": "husky install"
-    },
-    "husky": {
-        "hooks": {
-            "pre-commit": "npm run format && git add ."
-        }
+        "dev": "nodemon ./bin/www"
     },
     "dependencies": {
         "bcrypt": "^5.0.1",
@@ -40,9 +33,6 @@
         "node": "16.x"
     },
     "devDependencies": {
-        "eslint": "^8.26.0",
-        "husky": "^8.0.0",
-        "lint-staged": "^13.0.3",
         "morgan": "~1.9.1",
         "nodemon": "^2.0.15",
         "prettier": "^2.7.1"

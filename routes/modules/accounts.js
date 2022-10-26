@@ -1,406 +1,378 @@
-const bcrypt = require('bcrypt');
-const validator = require('email-validator');
-const jwt = require('jsonwebtoken');
-const xlsxFile = require('read-excel-file/node');
-const phoneNumberValidator = require('validate-phone-number-node-js');
-
-const accountModel = require('../../models/account');
+const bcrypt = require("bcrypt");
+const validator = require("email-validator");
+const jwt = require("jsonwebtoken");
+const xlsxFile = require("read-excel-file/node");
+const phoneNumberValidator = require("validate-phone-number-node-js");
+const accountModel = require("../../models/account");
 
 module.exports = {
-    login: async (req, res, next) => {
-        const userCode = req.body.userCode
-            ? req.body.userCode.toUpperCase()
-            : null;
-        const password = req.body.password;
+    accountLogin: async (req, res, next) => {
+        const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
+        const password = req.body.password || null;
         if (!userCode)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'User account is required!' },
+                statusCode: 200,
+                msg: { en: "User account is required.", vn: "Tài khoản đăng nhập là bắt buộc." },
             });
         if (!password)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Password is required!' },
+                statusCode: 200,
+                msg: { en: "Password is required.", vn: "Mật khẩu đăng nhập là bắt buộc." },
             });
         const accountQuery = await accountModel.findOne({ userCode });
-        if (!accountQuery)
-            return res.json({
-                status: false,
-                msg: { en: 'Account does not exist!' },
-            });
-        const validPassword = bcrypt.compareSync(
-            password,
-            accountQuery.password,
-        );
-        if (!validPassword)
-            return res.json({
-                status: false,
-                msg: { en: 'Invalid password!' },
-            });
-        const jwtSignature = jwt.sign(
-            {
-                // Set the expiration upto 1 days
-                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
-                data: {
-                    userCode: accountQuery.userCode,
-                    role: accountQuery.role,
-                    fullname: `${accountQuery.fullName}`,
-                },
-            },
-            process.env.SECRET_KEY,
-        );
-        await accountModel.findOneAndUpdate(
-            { userCode },
-            { access_token: jwtSignature },
-        );
-        // accountQuery.access_token = jwtSignature;
-        return res.json({
-            status: true,
-            msg: { en: 'Login successfully!' },
-            token: jwtSignature,
-        });
-    },
-    importAccount: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        if (!req.file)
-            return res.json({
-                status: false,
-                msg: { en: 'Excel file data is required!' },
-            });
-        const rows = await xlsxFile(req.file.path);
-        const invalidFormat =
-            rows[0][0].toUpperCase() !== 'USER CODE' ||
-            rows[0][1].toUpperCase() !== 'FULLNAME' ||
-            rows[0][2].toUpperCase() !== 'EMAIL' ||
-            rows[0][3].toUpperCase() !== 'PHONE NUMBER' ||
-            rows[0][4].toUpperCase() !== 'PASSWORD' ||
-            rows[0][5].toUpperCase() !== 'ROLE';
-        if (invalidFormat)
-            return res.json({
-                status: false,
-                msg: { en: `Invalid format excel file!` },
-            });
-
-        rows.forEach((element, index) => {
-            if (index > 0) {
-                if (!element[4])
-                    return res.json({
-                        status: false,
-                        msg: {
-                            en: `${
-                                element[1]
-                            } need to be set password. At row ${
-                                index + 1
-                            } in excel file!`,
+        if (accountQuery) {
+            const validPassword = bcrypt.compareSync(password, accountQuery.password);
+            const lastLogin = new Date();
+            if (validPassword) {
+                const jwtSignature = jwt.sign(
+                    {
+                        // Set the expiration upto 1 day
+                        exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+                        data: {
+                            userCode: accountQuery.userCode,
+                            fullName: accountQuery.fullName,
+                            email: accountQuery.email,
+                            phoneNumber: accountQuery.phoneNumber,
+                            role: accountQuery.role,
+                            lastLogin,
                         },
-                    });
-                let query = { userCode: element[0].toUpperCase() };
-                let update = {
-                    userCode: element[0],
-                    fullName: element[1],
-                    email: element[2],
-                    phoneNumber: element[3] ? element[3] : 'Unknown',
-                    password: bcrypt.hashSync(
-                        element[4],
-                        bcrypt.genSaltSync(10),
-                    ),
-                    role: element[5] ? element[5].toUpperCase() : 'STAFF',
-                };
-                let options = {
-                    upsert: true,
-                    new: true,
-                    setDefaultsOnInsert: true,
-                };
-                accountModel.findOneAndUpdate(
-                    query,
-                    update,
-                    options,
-                    function (error, result) {
-                        if (error) {
-                            return res.json({
-                                status: false,
-                                msg: {
-                                    en: 'Failed! An error occured, please try again!',
-                                },
-                            });
-                        } else {
-                            // If the document doesn't exist
-                            result = !result ? new accountModel() : result;
-                            // Save the document
-                            result.save();
-                        }
                     },
+                    process.env.SECRET_KEY
+                );
+                await accountModel.findOneAndUpdate({ userCode }, { access_token: jwtSignature, lastLogin });
+                return res.status(200).json({
+                    status: true,
+                    statusCode: 200,
+                    msg: { en: "Login successfully!", vn: "Đăng nhập thành công." },
+                    token: jwtSignature,
+                });
+            } else {
+                return res.status(401).json({
+                    status: false,
+                    statusCode: 401,
+                    msg: { en: "Invalid password!", vn: "Mật khẩu không hợp lệ." },
+                });
+            }
+        } else {
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: { en: "Account does not exist!", vn: "Tài khoản không tồn tại." },
+            });
+        }
+    },
+    accountImport: async (req, res, next) => {
+        const rows = await xlsxFile(req.file.path);
+
+        if (
+            rows[0][0].toUpperCase() !== "USER CODE" ||
+            rows[0][1].toUpperCase() !== "FULLNAME" ||
+            rows[0][2].toUpperCase() !== "EMAIL" ||
+            rows[0][3].toUpperCase() !== "PHONE NUMBER" ||
+            rows[0][4].toUpperCase() !== "PASSWORD" ||
+            rows[0][5].toUpperCase() !== "ROLE"
+        )
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: { en: "Invalid format excel file.", vn: "Tập tin excel không đúng cấu trúc." },
+            });
+        rows.forEach(async (element, index) => {
+            if (index > 0) {
+                await accountModel.findOneAndUpdate(
+                    { userCode: element[0].toUpperCase() },
+                    {
+                        userCode: element[0].toUpperCase(),
+                        fullName: element[1].toUpperCase(),
+                        email: element[2],
+                        phoneNumber: element[3],
+                        password: bcrypt.hashSync(element[4], bcrypt.genSaltSync(10)),
+                        role: element[5]
+                            ? element[5].toUpperCase() == "ADMIN"
+                                ? "STAFF"
+                                : element[5].toUpperCase()
+                            : null,
+                    },
+                    { upsert: true, new: true, setDefaultsOnInsert: true }
                 );
             }
         });
-        return res.json({
+        return res.status(200).json({
             status: true,
-            msg: { en: 'Account data synced success!' },
+            statusCode: 200,
+            msg: {
+                en: "All accounts has been import successfully!",
+                vn: "Đã nhập danh sách tài khoản thành công!",
+            },
         });
     },
-    registerAccount: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        const userCode = req.body.userCode
-            ? req.body.userCode.toUpperCase()
-            : null;
-        const fullName = req.body.fullName || null;
+    accountRegister: async (req, res, next) => {
+        const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
+        const fullName = req.body.fullName ? req.body.fullName.toUpperCase() : null;
         const email = req.body.email || null;
         const phoneNumber = req.body.phoneNumber || null;
         const password = req.body.password;
-        const role = req.body.role || null;
+        const role = req.body.role ? req.body.role.toUpperCase() : null;
+        const accountQuery = await accountModel.findOne({ userCode });
+
         if (!userCode)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'User account is required!' },
+                statusCode: 200,
+                msg: { en: "User account is required.", vn: "Tài khoản đăng nhập là bắt buộc." },
             });
         if (!fullName)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Fullname is required!' },
+                statusCode: 200,
+                msg: { en: "Fullname is required.", vn: "Họ và tên là bắt buộc." },
             });
         if (!email || !validator.validate(email))
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Email is required and must be a valid email!' },
+                statusCode: 200,
+                msg: {
+                    en: "Email is required and must be a valid email!",
+                    vn: "Email là bắt buộc và phải là email hợp lệ.",
+                },
             });
         if (!phoneNumber || !phoneNumberValidator.validate(phoneNumber))
-            return res.json({
+            return res.status(200).json({
                 status: false,
+                statusCode: 200,
                 msg: {
-                    en: 'Phone number is required and must be a valid phone number!',
+                    en: "Phone number is required and must be a valid phone number!",
+                    vn: "Số điện thoại là bắt buộc và phải là số điện thoại hợp lệ.",
                 },
             });
         if (!password || password.length < 6)
-            return res.json({
+            return res.status(200).json({
                 status: false,
+                statusCode: 200,
                 msg: {
-                    en: 'Password is required and must be at least 6 characters!',
+                    en: "Password is required and must be at least 6 characters!",
+                    vn: "Mật khẩu là bắt buộc và phải từ 6 ký tự trở lên.",
                 },
             });
-        const validRole =
-            role.toUpperCase() == 'MANAGER' || role.toUpperCase() == 'STAFF';
+        const validRole = role == "MANAGER" || role == "STAFF";
         if (!role || !validRole)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Role is required and must be a valid role!' },
+                statusCode: 200,
+                msg: {
+                    en: "Role is required and must be a valid role!",
+                    vn: "Phân quyền là bắt buộc và phải là phân quyền hợp lệ.",
+                },
             });
-        const accountQuery = await accountModel.findOne({ userCode });
         if (accountQuery)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Account has been already existed!' },
+                statusCode: 200,
+                msg: {
+                    en: "Account has been already existed!",
+                    vn: "Tài khoản này đã tồn tại.",
+                },
             });
         const newUser = new accountModel({
-            userCode: userCode.toUpperCase(),
-            fullName: fullName.toUpperCase,
+            userCode,
+            fullName,
             email,
             phoneNumber,
             password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
-            role: role.toUpperCase(),
+            role,
         });
         newUser.save();
-        return res.json({
+        return res.status(200).json({
             status: true,
-            msg: { en: 'Created a new account!' },
-            data: newUser,
-        });
-    },
-    disableAccount: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        const userCode = req.query.userCode
-            ? req.query.userCode.toUpperCase()
-            : null;
-        if (!userCode)
-            return res.json({
-                status: false,
-                msg: { en: 'User account is required!' },
-            });
-        if (userCode.toUpperCase() == 'ADMINISTRATOR')
-            return res.json({
-                status: false,
-                msg: { en: 'Permission denied! This is ADMIN account!' },
-            });
-        const accountQuery = await accountModel.findOne({
-            userCode: userCode.toUpperCase(),
-        });
-        if (!accountQuery)
-            return res.json({
-                status: false,
-                msg: { en: 'This account does not exist!' },
-            });
-        let query = { userCode: userCode.toUpperCase() };
-        let options = { upsert: true, new: true, setDefaultsOnInsert: true };
-        accountModel.findOneAndUpdate(
-            query,
-            { deleted: true },
-            options,
-            function (error, result) {
-                if (error) {
-                    return res.json({
-                        status: false,
-                        msg: {
-                            en: 'Failed! An error occured, please try again!',
-                        },
-                    });
-                } else {
-                    // If the document doesn't exist
-                    result = !result ? new accountModel() : result;
-                    // Save the document
-                    result.save();
-                }
+            statusCode: 200,
+            msg: {
+                en: `Account name "${fullName}" has been registered successfully!`,
+                vn: `Tài khoản "${fullName}" đã được tạo thành công.`,
             },
-        );
-        return res.json({
-            status: true,
-            msg: { en: 'Account has been disabled!' },
         });
     },
-    getProfile: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        const payload = await jwt.verify(token, process.env.SECRET_KEY);
-        const userCode = payload.data.userCode;
+    accountDisable: async (req, res, next) => {
+        const userCode = req.query.userCode ? req.query.userCode.toUpperCase() : null;
         const accountQuery = await accountModel.findOne({ userCode });
-        return res.json({
+        if (!userCode)
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: { en: "User account is required.", vn: "Tài khoản đăng nhập là bắt buộc." },
+            });
+        if (userCode == "ADMIN")
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: "Permission denied. This is ADMIN account.",
+                    vn: "Bạn không có quyền hạn để xoá tài khoản này.",
+                },
+            });
+
+        if (!accountQuery)
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: "Account does not exist!",
+                    vn: "Tài khoản này không tồn tại.",
+                },
+            });
+        await accountModel.deleteOne({ userCode });
+        return res.status(200).json({
             status: true,
-            msg: { en: 'successfully' },
-            data: {
-                email: accountQuery.email,
-                fullName: accountQuery.fullName,
-                userCode: accountQuery.userCode,
-                phoneNumer: accountQuery.phoneNumer,
-                lastLogin: accountQuery.lastLogin,
-                role: accountQuery.role,
-                createdAt: accountQuery.createdAt,
-                updatedAt: accountQuery.updatedAt,
+            statusCode: 200,
+            msg: {
+                en: `Account name "${accountQuery.fullName}" has been disabled.`,
+                vn: `Tài khoản "${accountQuery.fullName}" đã được vô hiệu hoá.`,
             },
+        });
+    },
+    accountGetProfile: async (req, res, next) => {
+        const token = req.query.token || req.headers["x-access-token"];
+        jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
+            const accountQuery = await accountModel.findOne({ userCode: payload.data.userCode });
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: "Get personal information successfully!",
+                    vn: "Tải thông tin cá nhân thành công!",
+                },
+                data: {
+                    email: accountQuery.email,
+                    fullName: accountQuery.fullName,
+                    userCode: accountQuery.userCode,
+                    phoneNumer: accountQuery.phoneNumer,
+                    lastLogin: accountQuery.lastLogin,
+                    role: accountQuery.role,
+                    createdAt: accountQuery.createdAt,
+                    updatedAt: accountQuery.updatedAt,
+                },
+            });
         });
     },
     accountUpdateMe: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        const payload = await jwt.verify(token, process.env.SECRET_KEY);
-        const accountQuery = await accountModel.findOne({
-            userCode: payload.data.userCode,
-        });
-        const options = { upsert: true, new: true, setDefaultsOnInsert: true };
-        const query = { userCode: payload.data.userCode.toUpperCase() };
-        let update = {
-            email: req.body.email || accountQuery.email,
-            fullName: req.body.fullName
-                ? req.body.fullName.toUpperCase()
-                : null || accountQuery.fullName,
-            phoneNumer: req.body.phoneNumber || accountQuery.phoneNumer,
-        };
-        accountModel.findOneAndUpdate(
-            query,
-            update,
-            options,
-            function (error, result) {
-                if (error) {
-                    return res.json({
-                        status: false,
-                        msg: {
-                            en: 'Failed! An error occured, please try again!',
-                        },
-                    });
-                } else {
-                    // If the document doesn't exist
-                    result = !result ? new accountModel() : result;
-                    // Save the document
-                    result.save();
-                }
-            },
-        );
-        return res.json({
-            status: true,
-            message: 'Updated information successfully!',
+        const token = req.query.token || req.headers["x-access-token"];
+        jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
+            const accountQuery = await accountModel.findOne({ userCode: payload.data.userCode });
+            await accountModel.findOneAndUpdate(
+                { userCode: payload.data.userCode },
+                {
+                    email: req.body.email || accountQuery.email,
+                    fullName: req.body.fullName ? req.body.fullName.toUpperCase() : null || accountQuery.fullName,
+                    phoneNumer: req.body.phoneNumber || accountQuery.phoneNumer,
+                },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `Account name "${accountQuery.fullName}" has been updated successfully!`,
+                    vn: `Tài khoản "${accountQuery.fullName}" đã được cập nhật thông tin thành công.`,
+                },
+            });
         });
     },
     accountChangePassword: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
-        const payload = await jwt.verify(token, process.env.SECRET_KEY);
+        const token = req.query.token || req.headers["x-access-token"];
         const oldPassword = req.body.oldPassword || null;
         const newPassword = req.body.newPassword || null;
         const repeatPassword = req.body.repeatPassword || null;
-        const accountQuery = await accountModel.findOne({
-            userCode: payload.data.userCode,
-        });
-
         if (!oldPassword)
-            return res.json({
+            return res.status(200).json({
                 status: false,
-                msg: { en: 'Old password is required.' },
+                statusCode: 200,
+                msg: {
+                    en: "Old password is required.",
+                    vn: "Mật khẩu cũ là bắt buộc.",
+                },
             });
         if (!newPassword || newPassword.length < 6)
-            return res.json({
+            return res.status(200).json({
                 status: false,
+                statusCode: 200,
                 msg: {
-                    en: 'New password is required and must be at least 6 characters.',
+                    en: "New password is required and must be at least 6 characters.",
+                    vn: "Mật khẩu mới không được để trống và phải ít nhất 6 ký tự.",
                 },
             });
-        if (!repeatPassword || repeatPassword.length < 6)
-            return res.json({
+        if (!repeatPassword || newPassword !== repeatPassword)
+            return res.status(200).json({
                 status: false,
+                statusCode: 200,
                 msg: {
-                    en: 'Repeat password is required and must be at least 6 characters.',
+                    en: "Repeat password is required and must be matched new password.",
+                    vn: "Mật khẩu xác nhận không được để trống và phải khớp với mật khẩu mới.",
                 },
             });
-
-        if (newPassword !== repeatPassword)
-            return res.json({
-                status: false,
-                msg: { en: 'Password does not match!' },
-            });
-
-        const validPassword = bcrypt.compareSync(
-            oldPassword,
-            accountQuery.password,
-        );
-        if (!validPassword)
-            return res.json({
-                status: false,
-                msg: { en: 'Invalid password!' },
-            });
-        const jwtSignature = jwt.sign(
-            {
-                // Set the expiration upto 1 days
-                exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
-                data: {
-                    userCode: accountQuery.userCode,
-                    role: accountQuery.role,
-                    fullname: `${accountQuery.fullName}`,
+        jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
+            const accountQuery = await accountModel.findOne({ userCode: payload.data.userCode });
+            if (!bcrypt.compareSync(oldPassword, accountQuery.password))
+                return res.status(401).json({
+                    status: false,
+                    statusCode: 401,
+                    msg: {
+                        en: "Old password is incorrect.",
+                        vn: "Mật khẩu cũ không đúng.",
+                    },
+                });
+            const jwtSignature = jwt.sign(
+                {
+                    // Set the expiration upto 1 day
+                    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24,
+                    data: {
+                        userCode: accountQuery.userCode,
+                        fullName: accountQuery.fullName,
+                        email: accountQuery.email,
+                        phoneNumber: accountQuery.phoneNumber,
+                        role: accountQuery.role,
+                        lastLogin,
+                    },
                 },
-            },
-            process.env.SECRET_KEY,
-        );
-        // const options = { upsert: true, new: true, setDefaultsOnInsert: true };
-        const query = { userCode: accountQuery.userCode.toUpperCase() };
-        let update = {
-            password: bcrypt.hashSync(repeatPassword, bcrypt.genSaltSync(10)),
-            access_token: jwtSignature,
-        };
-        await accountModel.findOneAndUpdate(query, update);
-        return res.json({
-            status: true,
-            msg: { en: 'Password has been updated successfully!' },
-            token: jwtSignature,
+                process.env.SECRET_KEY
+            );
+            await accountModel.findOneAndUpdate(
+                { userCode: payload.data.userCode },
+                {
+                    password: bcrypt.hashSync(repeatPassword, bcrypt.genSaltSync(10)),
+                    access_token: jwtSignature,
+                },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `Password of "${accountQuery.fullName}" has been updated successfully!`,
+                    vn: `Mật khẩu tài khoản "${accountQuery.fullName}" đã được cập nhật thành công.`,
+                },
+                token: jwtSignature,
+            });
         });
     },
     accountGetAll: async (req, res, next) => {
-        const token = req.query.token || req.headers['x-access-token'];
         const accountList = await accountModel.find({});
         if (accountList.length > 0) {
-            return res.json({
+            return res.status(200).json({
                 status: true,
-                message: 'Get list of all accounts.',
+                statusCode: 200,
+                msg: { en: "Get list of all accounts.", vn: "Danh sách tất cả tài khoản." },
                 result: {
                     total: accountList.length,
-                    data: accountList.length > 0 ? accountList : [],
+                    data: accountList,
                 },
             });
         } else {
-            return res.json({
-                status: false,
-                message: 'There is no data!',
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: { en: "There is no data.", vn: "Danh sách trống, không có dữ liệu nào." },
+                result: [],
             });
         }
     },

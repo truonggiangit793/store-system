@@ -1,26 +1,27 @@
-const Router = require('express').Router();
-const authorization = require('../middlewares/authorization');
-const authentication = require('../middlewares/authentication');
-const multer = require('../services/multer');
+const Router = require("express").Router();
+const authorization = require("../middlewares/authorization");
+const authentication = require("../middlewares/authentication");
+const multerService = require("../services/multer");
+const downloadExample = require("./modules/examples");
 
 const {
-    login,
-    importAccount,
-    registerAccount,
-    getProfile,
-    disableAccount,
+    accountLogin,
+    accountImport,
+    accountRegister,
+    accountGetProfile,
+    accountDisable,
     accountGetAll,
     accountUpdateMe,
     accountChangePassword,
-} = require('./modules/accounts');
+} = require("./modules/accounts");
 
 const {
-    importSupplier,
+    supplierImport,
     supplierRegister,
     supplierDelete,
     supplierGetAll,
     supplierGetDetail,
-} = require('./modules/suppliers');
+} = require("./modules/suppliers");
 
 const {
     productImport,
@@ -28,120 +29,59 @@ const {
     productGetDetail,
     productGetAll,
     productDelete,
-} = require('./modules/products');
+} = require("./modules/products");
 
-const downloadExample = require('./modules/download_example');
+/**
+ * Account ================================================================
+ */
+Router.post("/account/login", accountLogin);
 
-Router.post('/login', login);
+Router.post("/account/import", authentication, authorization.admin, multerService, accountImport);
 
-Router.post(
-    '/account/import',
-    authentication,
-    authorization.admin,
-    multer.accountImport,
-    importAccount,
-);
+Router.post("/account/register", authentication, authorization.admin, accountRegister);
 
-Router.post(
-    '/account/register',
-    authentication,
-    authorization.admin,
-    registerAccount,
-);
+Router.delete("/account/disable", authentication, authorization.admin, accountDisable);
 
-Router.delete(
-    '/account/disable',
-    authentication,
-    authorization.admin,
-    disableAccount,
-);
+Router.get("/account/me", authentication, accountGetProfile);
 
-Router.get('/account/me', authentication, getProfile);
+Router.put("/account/update-me", authentication, accountUpdateMe);
 
-Router.put('/account/update-me', authentication, accountUpdateMe);
+Router.patch("/account/change-password", authentication, accountChangePassword);
 
-Router.patch('/account/change-password', authentication, accountChangePassword);
+Router.get("/account/get-all", authentication, authorization.admin, accountGetAll);
 
-Router.get(
-    '/account/get-all',
-    authentication,
-    authorization.admin,
-    accountGetAll,
-);
+Router.get("/account/download-example", authentication, downloadExample.downloadAccountExample);
 
-Router.post(
-    '/supplier/import',
-    authentication,
-    authorization.admin,
-    multer.supplierImport,
-    importSupplier,
-);
+/**
+ * Supplier ================================================================
+ */
 
-Router.post(
-    '/supplier/register',
-    authentication,
-    authorization.admin,
-    supplierRegister,
-);
+Router.post("/supplier/import", authentication, authorization.admin, multerService, supplierImport);
 
-Router.get(
-    '/supplier/get-detail',
-    authentication,
-    authorization.admin,
-    supplierGetDetail,
-);
+Router.post("/supplier/register", authentication, authorization.admin, supplierRegister);
 
-Router.get(
-    '/supplier/get-all',
-    authentication,
-    authorization.admin,
-    supplierGetAll,
-);
+Router.get("/supplier/get-detail", authentication, authorization.admin, supplierGetDetail);
 
-Router.delete(
-    '/supplier/delete',
-    authentication,
-    authorization.admin,
-    supplierDelete,
-);
+Router.get("/supplier/get-all", authentication, authorization.admin, supplierGetAll);
 
-Router.post(
-    '/products/import',
-    authentication,
-    authorization.admin,
-    multer.productImport,
-    productImport,
-);
+Router.delete("/supplier/delete", authentication, authorization.admin, supplierDelete);
 
-Router.post(
-    '/products/register',
-    authentication,
-    authorization.admin,
-    productRegister,
-);
+Router.get("/supplier/download-example", authentication, downloadExample.downloadSupplierExample);
 
-Router.get('/products/get-detail', authentication, productGetDetail);
+/**
+ * Product ================================================================
+ */
 
-Router.get('/products/get-all', authentication, productGetAll);
+Router.post("/product/import", authentication, authorization.admin, multerService, productImport);
 
-Router.delete('/products/delete', authentication, productDelete);
+Router.post("/product/register", authentication, authorization.admin, productRegister);
 
-Router.get(
-    '/file/download-example-account',
-    authentication,
-    downloadExample.downloadAccountExample,
-);
+Router.get("/product/get-detail", authentication, productGetDetail);
 
-Router.get(
-    '/file/download-example-supplier',
-    authentication,
-    downloadExample.downloadSupplierExample,
-);
+Router.get("/product/get-all", authentication, productGetAll);
 
-Router.get(
-    '/file/download-example-product',
-    authentication,
-    downloadExample.downloadProductExample,
-);
+Router.delete("/product/delete", authentication, productDelete);
+
+Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
 module.exports = Router;
