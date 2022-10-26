@@ -265,7 +265,7 @@ module.exports = {
                     email: accountQuery.email,
                     fullName: accountQuery.fullName,
                     userCode: accountQuery.userCode,
-                    phoneNumer: accountQuery.phoneNumer,
+                    phoneNumber: accountQuery.phoneNumber,
                     lastLogin: accountQuery.lastLogin,
                     role: accountQuery.role,
                     createdAt: accountQuery.createdAt,
@@ -285,7 +285,7 @@ module.exports = {
                 {
                     email: req.body.email || accountQuery.email,
                     fullName: req.body.fullName ? req.body.fullName.toUpperCase() : null || accountQuery.fullName,
-                    phoneNumer: req.body.phoneNumber || accountQuery.phoneNumer,
+                    phoneNumber: req.body.phoneNumber || accountQuery.phoneNumber,
                 },
                 { upsert: true, new: true, setDefaultsOnInsert: true }
             );
