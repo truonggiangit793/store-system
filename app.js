@@ -22,7 +22,12 @@ app.use(express.static(path.join(__dirname, "client")));
 
 const outputFile = "./services/swagger_output.json";
 const endpointsFiles = ["./routes/api.js"];
-const doc = { host: `localhost:${process.env.PORT}/api/v1` };
+const doc = {
+    info: {
+        title: "Store System Rest API",
+    },
+    host: `localhost:${process.env.PORT}/api/v1`,
+};
 swaggerAutogen(outputFile, endpointsFiles, doc);
 
 // Define routes end point

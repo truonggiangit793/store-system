@@ -5,6 +5,17 @@ const supplierModel = require("../../models/supplier");
 
 module.exports = {
     productImport: async (req, res, next) => {
+        /*
+            #swagger.tags = ['Products']
+            #swagger.description = 'Admin can user this endpoint for importing list of products to database instead of register for each one.'
+            #swagger.consumes = ['multipart/form-data']  
+            #swagger.parameters['file'] = {
+                in: 'formData',
+                type: 'file',
+                required: 'true',
+                description: 'Upload excel file data. Only excel format is allowed.',
+            } 
+        */
         const rows = await xlsxFile(req.file.path);
         if (
             rows[0][0].toUpperCase() !== "BARCODE" ||
@@ -48,6 +59,8 @@ module.exports = {
         });
     },
     productRegister: async (req, res, next) => {
+        // #swagger.tags = ['Products']
+        // #swagger.description = 'This endpoint provides method for registering each of product.'
         const barcode = req.body.barcode ? req.body.barcode.toUpperCase() : null;
         const productName = req.body.productName ? req.body.productName.toUpperCase() : null;
         const UOM = req.body.UOM ? req.body.UOM.toUpperCase() : null;
@@ -149,6 +162,8 @@ module.exports = {
         });
     },
     productGetDetail: async (req, res, next) => {
+        // #swagger.tags = ['Products']
+        // #swagger.description = 'Admin can show the detail of any products by using this endpoint.'
         const barcode = req.query.barcode ? req.query.barcode.toUpperCase() : null;
         const productQuery = await productModel.findOne({ barcode });
         if (!barcode)
@@ -193,6 +208,8 @@ module.exports = {
         }
     },
     productGetAll: async (req, res, next) => {
+        // #swagger.tags = ['Products']
+        // #swagger.description = 'Admin can list of all products by using this endpoint.'
         const productList = await productModel.find({});
         if (productList.length > 0) {
             return res.status(200).json({
@@ -214,6 +231,8 @@ module.exports = {
         }
     },
     productDelete: async (req, res, next) => {
+        // #swagger.tags = ['Products']
+        // #swagger.description = 'Admin can remove any products through this endpoint.'
         const barcode = req.query.barcode ? req.query.barcode.toUpperCase() : null;
         const productQuery = await productModel.findOne({ barcode });
         if (!barcode)

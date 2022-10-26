@@ -6,6 +6,16 @@ const phoneNumberValidator = require("validate-phone-number-node-js");
 
 module.exports = {
     supplierImport: async (req, res, next) => {
+        /*
+            #swagger.tags = ['Suppliers']
+            #swagger.description = 'Admin can user this endpoint for importing list of suppliers to database instead of register for each one.'
+            #swagger.consumes = ['multipart/form-data']  
+            #swagger.parameters['file'] = {
+                in: 'formData',
+                type: 'file',
+                required: 'true',
+                description: 'Upload excel file data. Only excel format is allowed.',
+        } */
         const rows = await xlsxFile(req.file.path);
         if (
             rows[0][0].toUpperCase() !== "SUPPLIER CODE" ||
@@ -46,6 +56,8 @@ module.exports = {
         });
     },
     supplierRegister: async (req, res, next) => {
+        // #swagger.tags = ['Suppliers']
+        // #swagger.description = 'This endpoint provides method for registering each of supplier.'
         const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
         const supplierName = req.body.supplierName ? req.body.supplierName.topUpperCase() : null;
         const address = req.body.address || null;
@@ -104,6 +116,8 @@ module.exports = {
         });
     },
     supplierGetAll: async (req, res, next) => {
+        // #swagger.tags = ['Suppliers']
+        // #swagger.description = 'Admin can list of all suppliers by using this endpoint.'
         const supplierList = await supplierModel.find({});
         if (supplierList.length > 0) {
             const resultData = await Promise.all(
@@ -139,6 +153,8 @@ module.exports = {
         }
     },
     supplierGetDetail: async (req, res, next) => {
+        // #swagger.tags = ['Suppliers']
+        // #swagger.description = 'Admin can show the detail of any suppliers by using this endpoint.'
         const supplierCode = req.query.supplierCode ? req.query.supplierCode.toUpperCase() : null;
         const supplierQuery = await supplierModel.findOne({ supplierCode });
         const productRefsList = await productModel.find({ supplierCode });
@@ -176,6 +192,8 @@ module.exports = {
         }
     },
     supplierDelete: async (req, res, next) => {
+        // #swagger.tags = ['Suppliers']
+        // #swagger.description = 'Admin can disable any suppliers through this endpoint.'
         const supplierCode = req.query.supplierCode ? req.query.supplierCode.toUpperCase() : null;
         const supplierQuery = await supplierModel.findOne({ supplierCode });
         if (!supplierCode)

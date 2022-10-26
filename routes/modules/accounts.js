@@ -7,6 +7,8 @@ const accountModel = require("../../models/account");
 
 module.exports = {
     accountLogin: async (req, res, next) => {
+        // #swagger.tags = ['Accounts']
+        // #swagger.description = 'This endpoint provides method for logging in system. Then receive an access token.'
         const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
         const password = req.body.password || null;
         if (!userCode)
@@ -64,6 +66,16 @@ module.exports = {
         }
     },
     accountImport: async (req, res, next) => {
+        /*
+            #swagger.tags = ['Accounts']
+            #swagger.consumes = ['multipart/form-data']  
+            #swagger.parameters['file'] = {
+                in: 'formData',
+                type: 'file',
+                required: 'true',
+                description: 'Upload excel file data. Only excel format is allowed.',
+        } */
+        // #swagger.description = 'Admin can user this endpoint for importing list of accounts to database instead of register for each one.'
         const rows = await xlsxFile(req.file.path);
 
         if (
@@ -109,6 +121,8 @@ module.exports = {
         });
     },
     accountRegister: async (req, res, next) => {
+        // #swagger.tags = ['Accounts']
+        // #swagger.description = 'This endpoint provides method for registering each of account.'
         const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
         const fullName = req.body.fullName ? req.body.fullName.toUpperCase() : null;
         const email = req.body.email || null;
@@ -194,6 +208,8 @@ module.exports = {
         });
     },
     accountDisable: async (req, res, next) => {
+        // #swagger.tags = ['Accounts']
+        // #swagger.description = 'Admin can disable any account through this endpoint.'
         const userCode = req.query.userCode ? req.query.userCode.toUpperCase() : null;
         const accountQuery = await accountModel.findOne({ userCode });
         if (!userCode)
@@ -232,6 +248,8 @@ module.exports = {
         });
     },
     accountGetProfile: async (req, res, next) => {
+        // #swagger.tags = ['Accounts']
+        // #swagger.description = 'The server response the personal information of the current session.'
         const token = req.query.token || req.headers["x-access-token"];
         jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
             const accountQuery = await accountModel.findOne({ userCode: payload.data.userCode });
@@ -256,6 +274,8 @@ module.exports = {
         });
     },
     accountUpdateMe: async (req, res, next) => {
+        // #swagger.tags = ['Accounts']
+        // #swagger.description = 'Users of the system can update their information by calling this api .'
         const token = req.query.token || req.headers["x-access-token"];
         jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
             const accountQuery = await accountModel.findOne({ userCode: payload.data.userCode });
@@ -279,6 +299,8 @@ module.exports = {
         });
     },
     accountChangePassword: async (req, res, next) => {
+        // #swagger.tags = ['Accounts']
+        // #swagger.description = 'This endpoint allows user can change their password and refresh their access token.'
         const token = req.query.token || req.headers["x-access-token"];
         const oldPassword = req.body.oldPassword || null;
         const newPassword = req.body.newPassword || null;
@@ -356,6 +378,8 @@ module.exports = {
         });
     },
     accountGetAll: async (req, res, next) => {
+        // #swagger.tags = ['Accounts']
+        // #swagger.description = 'Admin can list of all accounts by using this endpoint.'
         const accountList = await accountModel.find({});
         if (accountList.length > 0) {
             return res.status(200).json({

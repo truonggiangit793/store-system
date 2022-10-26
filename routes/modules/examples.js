@@ -27,6 +27,8 @@ const pipFileStream = (res) => {
 
 module.exports = {
     downloadAccountExample: async (req, res, next) => {
+        // #swagger.tags = ['File Example']
+        // #swagger.description = 'Render and dowload the example excel file for importing accounts.'
         worksheet.cell(1, 1).string("User Code").style(titleStyle);
         worksheet.cell(1, 2).string("Fullname").style(titleStyle);
         worksheet.cell(1, 3).string("Email").style(titleStyle);
@@ -36,6 +38,8 @@ module.exports = {
         pipFileStream(res);
     },
     downloadSupplierExample: async (req, res, next) => {
+        // #swagger.tags = ['File Example']
+        // #swagger.description = 'Render and dowload the example excel file for importing suppliers.'
         worksheet.cell(1, 1).string("Supplier Code").style(titleStyle);
         worksheet.cell(1, 2).string("Supplier Name").style(titleStyle);
         worksheet.cell(1, 3).string("Adress").style(titleStyle);
@@ -43,6 +47,8 @@ module.exports = {
         pipFileStream(res);
     },
     downloadProductExample: async (req, res, next) => {
+        // #swagger.tags = ['File Example']
+        // #swagger.description = 'Render and dowload the example excel file for importing products.'
         worksheet.cell(1, 1).string("Barcode").style(titleStyle);
         worksheet.cell(1, 2).string("Product Name").style(titleStyle);
         worksheet.cell(1, 3).string("UOM").style(titleStyle);

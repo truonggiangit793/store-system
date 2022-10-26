@@ -1,8 +1,8 @@
 {
   "swagger": "2.0",
   "info": {
+    "title": "Store System Rest API",
     "version": "1.0.0",
-    "title": "REST API",
     "description": ""
   },
   "host": "localhost:3000/api/v1",
@@ -13,7 +13,10 @@
   "paths": {
     "/account/login": {
       "post": {
-        "description": "",
+        "tags": [
+          "Accounts"
+        ],
+        "description": "This endpoint provides method for logging in system. Then receive an access token.",
         "parameters": [
           {
             "name": "body",
@@ -43,7 +46,13 @@
     },
     "/account/import": {
       "post": {
-        "description": "",
+        "tags": [
+          "Accounts"
+        ],
+        "description": "Admin can user this endpoint for importing list of accounts to database instead of register for each one.",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "x-access-token",
@@ -54,6 +63,13 @@
             "name": "token",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "Upload excel file data. Only excel format is allowed."
           }
         ],
         "responses": {
@@ -71,7 +87,10 @@
     },
     "/account/register": {
       "post": {
-        "description": "",
+        "tags": [
+          "Accounts"
+        ],
+        "description": "This endpoint provides method for registering each of account.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -126,7 +145,10 @@
     },
     "/account/disable": {
       "delete": {
-        "description": "",
+        "tags": [
+          "Accounts"
+        ],
+        "description": "Admin can disable any account through this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -159,7 +181,10 @@
     },
     "/account/me": {
       "get": {
-        "description": "",
+        "tags": [
+          "Accounts"
+        ],
+        "description": "The server response the personal information of the current session.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -184,7 +209,10 @@
     },
     "/account/update-me": {
       "put": {
-        "description": "",
+        "tags": [
+          "Accounts"
+        ],
+        "description": "Users of the system can update their information by calling this api .",
         "parameters": [
           {
             "name": "x-access-token",
@@ -227,7 +255,10 @@
     },
     "/account/change-password": {
       "patch": {
-        "description": "",
+        "tags": [
+          "Accounts"
+        ],
+        "description": "This endpoint allows user can change their password and refresh their access token.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -270,7 +301,10 @@
     },
     "/account/get-all": {
       "get": {
-        "description": "",
+        "tags": [
+          "Accounts"
+        ],
+        "description": "Admin can list of all accounts by using this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -298,7 +332,10 @@
     },
     "/account/download-example": {
       "get": {
-        "description": "",
+        "tags": [
+          "File Example"
+        ],
+        "description": "Render and dowload the example excel file for importing accounts.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -320,7 +357,13 @@
     },
     "/supplier/import": {
       "post": {
-        "description": "",
+        "tags": [
+          "Suppliers"
+        ],
+        "description": "Admin can user this endpoint for importing list of suppliers to database instead of register for each one.",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "x-access-token",
@@ -331,6 +374,13 @@
             "name": "token",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "Upload excel file data. Only excel format is allowed."
           }
         ],
         "responses": {
@@ -348,7 +398,10 @@
     },
     "/supplier/register": {
       "post": {
-        "description": "",
+        "tags": [
+          "Suppliers"
+        ],
+        "description": "This endpoint provides method for registering each of supplier.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -397,7 +450,10 @@
     },
     "/supplier/get-detail": {
       "get": {
-        "description": "",
+        "tags": [
+          "Suppliers"
+        ],
+        "description": "Admin can show the detail of any suppliers by using this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -433,7 +489,10 @@
     },
     "/supplier/get-all": {
       "get": {
-        "description": "",
+        "tags": [
+          "Suppliers"
+        ],
+        "description": "Admin can list of all suppliers by using this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -461,7 +520,10 @@
     },
     "/supplier/delete": {
       "delete": {
-        "description": "",
+        "tags": [
+          "Suppliers"
+        ],
+        "description": "Admin can disable any suppliers through this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -497,7 +559,10 @@
     },
     "/supplier/download-example": {
       "get": {
-        "description": "",
+        "tags": [
+          "File Example"
+        ],
+        "description": "Render and dowload the example excel file for importing suppliers.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -519,7 +584,13 @@
     },
     "/product/import": {
       "post": {
-        "description": "",
+        "tags": [
+          "Products"
+        ],
+        "description": "Admin can user this endpoint for importing list of products to database instead of register for each one.",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
             "name": "x-access-token",
@@ -530,6 +601,13 @@
             "name": "token",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "Upload excel file data. Only excel format is allowed."
           }
         ],
         "responses": {
@@ -547,7 +625,10 @@
     },
     "/product/register": {
       "post": {
-        "description": "",
+        "tags": [
+          "Products"
+        ],
+        "description": "This endpoint provides method for registering each of product.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -602,7 +683,10 @@
     },
     "/product/get-detail": {
       "get": {
-        "description": "",
+        "tags": [
+          "Products"
+        ],
+        "description": "Admin can show the detail of any products by using this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -635,7 +719,10 @@
     },
     "/product/get-all": {
       "get": {
-        "description": "",
+        "tags": [
+          "Products"
+        ],
+        "description": "Admin can list of all products by using this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -660,7 +747,10 @@
     },
     "/product/delete": {
       "delete": {
-        "description": "",
+        "tags": [
+          "Products"
+        ],
+        "description": "Admin can remove any products through this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",
@@ -693,7 +783,10 @@
     },
     "/product/download-example": {
       "get": {
-        "description": "",
+        "tags": [
+          "File Example"
+        ],
+        "description": "Render and dowload the example excel file for importing products.",
         "parameters": [
           {
             "name": "x-access-token",
