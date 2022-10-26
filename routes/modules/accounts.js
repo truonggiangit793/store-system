@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const xlsxFile = require("read-excel-file/node");
 const phoneNumberValidator = require("validate-phone-number-node-js");
 const accountModel = require("../../models/account");
+const adminConfig = require("../../configs/adminConfig");
 
 module.exports = {
     accountLogin: async (req, res, next) => {
@@ -218,7 +219,7 @@ module.exports = {
                 statusCode: 200,
                 msg: { en: "User account is required.", vn: "Tài khoản đăng nhập là bắt buộc." },
             });
-        if (userCode == "ADMIN")
+        if (userCode == adminConfig.userCode)
             return res.status(200).json({
                 status: false,
                 statusCode: 200,
