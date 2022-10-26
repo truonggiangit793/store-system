@@ -28,10 +28,10 @@ module.exports = {
                 statusCode: 200,
                 msg: { en: "Invalid format excel file.", vn: "Tập tin excel không đúng cấu trúc." },
             });
-        rows.forEach((element, index) => {
+        rows.forEach(async (element, index) => {
             if (index > 0) {
-                supplierModel.findOneAndUpdate(
-                    { supplierCode: element[0] },
+                await supplierModel.findOneAndUpdate(
+                    { supplierCode: element[0].toUpperCase() },
                     {
                         supplierCode: element[0].toUpperCase(),
                         supplierName: element[1].toUpperCase(),
