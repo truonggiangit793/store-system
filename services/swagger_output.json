@@ -642,6 +642,47 @@
         }
       }
     },
+    "/product/quantity-import": {
+      "post": {
+        "tags": [
+          "Products"
+        ],
+        "description": "Admin can user this endpoint for importing quantity of products to database instead of register for each one.",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "Upload excel file data. Only excel format is allowed."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/product/register": {
       "post": {
         "tags": [
@@ -745,6 +786,39 @@
           "Products"
         ],
         "description": "Admin can list of all products by using this endpoint.",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/product/get-out-of-stock": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "description": "Admin can list of all products that is out of stock by using this endpoint.",
         "parameters": [
           {
             "name": "x-access-token",

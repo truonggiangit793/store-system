@@ -25,9 +25,11 @@ const {
 
 const {
     productImport,
+    productQuantityImport,
     productRegister,
     productGetDetail,
     productGetAll,
+    productGetOutOfStock,
     productDelete,
     productUpdateQuantity,
 } = require("./modules/products");
@@ -76,15 +78,21 @@ Router.get("/supplier/download-example", authentication, downloadExample.downloa
 
 Router.post("/product/import", authentication, authorization.admin, multerService, productImport);
 
+Router.post("/product/quantity-import", authentication, authorization.admin, multerService, productQuantityImport);
+
 Router.post("/product/register", authentication, authorization.admin, productRegister);
 
 Router.get("/product/get-detail", authentication, productGetDetail);
 
 Router.get("/product/get-all", authentication, productGetAll);
 
+Router.get("/product/get-out-of-stock", authentication, productGetOutOfStock);
+
 Router.delete("/product/delete", authentication, productDelete);
 
 Router.patch("/product/update-quantity", authentication, authorization.admin, productUpdateQuantity);
+
+Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
