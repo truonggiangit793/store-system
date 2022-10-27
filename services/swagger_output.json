@@ -161,9 +161,16 @@
             "type": "string"
           },
           {
-            "name": "userCode",
-            "in": "query",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userCode": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -541,9 +548,16 @@
             "type": "string"
           },
           {
-            "name": "supplierCode",
-            "in": "query",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "supplierCode": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -668,6 +682,9 @@
                 },
                 "unitCost": {
                   "example": "any"
+                },
+                "quantity": {
+                  "example": "any"
                 }
               }
             }
@@ -773,9 +790,16 @@
             "type": "string"
           },
           {
-            "name": "barcode",
-            "in": "query",
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "barcode": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -787,6 +811,55 @@
           },
           "404": {
             "description": "Not Found"
+          }
+        }
+      }
+    },
+    "/product/update-quantity": {
+      "patch": {
+        "tags": [
+          "Products"
+        ],
+        "description": "Admin can update product quantity through this endpoint.",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "barcode": {
+                  "example": "any"
+                },
+                "quantity": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
       }

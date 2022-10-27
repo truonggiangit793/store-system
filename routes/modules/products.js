@@ -23,7 +23,8 @@ module.exports = {
             rows[0][2].toUpperCase() !== "UOM" ||
             rows[0][3].toUpperCase() !== "DEPARTMENT" ||
             rows[0][4].toUpperCase() !== "SUPPLIER CODE" ||
-            rows[0][5].toUpperCase() !== "UNIT COST"
+            rows[0][5].toUpperCase() !== "UNIT COST" ||
+            rows[0][6].toUpperCase() !== "QUANTITY"
         )
             return res.status(200).json({
                 status: false,
@@ -44,6 +45,7 @@ module.exports = {
                         supplierCode: element[4].toUpperCase(),
                         supplierName: supplierQuery ? supplierQuery.supplierName : "Unknown",
                         unitCost: element[5] ? element[5] : "0",
+                        quantity: element[6] ? parseInt(element[6]) : 0,
                     },
                     { upsert: true, new: true, setDefaultsOnInsert: true }
                 );
@@ -67,6 +69,7 @@ module.exports = {
         const department = req.body.department ? req.body.department.toUpperCase() : null;
         const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
         const unitCost = req.body.unitCost || null;
+        const quantity = req.body.unitCost ? parseInt(req.body.quantity) : 0;
         const productQuery = await productModel.findOne({ barcode });
         const supplierQuery = await supplierModel.findOne({ supplierCode });
         const regex = /^([\u20AC]?[1-9]\d*\.\d{3}(?:,\d{2,9})?|[\u20AC]?[1-9]\d*(?:,\d{2,9})?|[\u20AC]?[1-9]\d*)$/;
@@ -124,6 +127,15 @@ module.exports = {
                     vn: "Giá sản phẩm là bắt buộc và phải là định dạng tiền tệ hợp lệ.",
                 },
             });
+        if (!quantity)
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: "Quantity of product is required!",
+                    vn: "Số lượng sản phẩm là bắt buộc.",
+                },
+            });
         if (productQuery)
             return res.status(200).json({
                 status: false,
@@ -150,6 +162,7 @@ module.exports = {
             supplierCode,
             supplierName: supplierQuery.supplierName,
             unitCost,
+            quantity,
         });
         product.save();
         return res.status(200).json({
@@ -247,7 +260,7 @@ module.exports = {
     productDelete: async (req, res, next) => {
         // #swagger.tags = ['Products']
         // #swagger.description = 'Admin can remove any products through this endpoint.'
-        const barcode = req.query.barcode ? req.query.barcode.toUpperCase() : null;
+        const barcode = req.body.barcode ? req.body.barcode.toUpperCase() : null;
         const productQuery = await productModel.findOne({ barcode });
         if (!barcode)
             return res.status(200).json({
@@ -274,6 +287,49 @@ module.exports = {
             msg: {
                 en: `Product barcode "${barcode}" has been removed successfully!`,
                 vn: `Mã vạch sản phẩm "${barcode}" đã được gỡ bỏ thành công.`,
+            },
+        });
+    },
+    productUpdateQuantity: async (req, res, next) => {
+        // #swagger.tags = ['Products']
+        // #swagger.description = 'Admin can update product quantity through this endpoint.'
+        const barcode = req.body.barcode ? req.body.barcode.toUpperCase() : null;
+        const quantity = req.body.quantity ? parseInt(req.body.quantity) : 0;
+        const productQuery = await productModel.findOne({ barcode });
+        if (!barcode)
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: "Barcode is required!",
+                    vn: "Mã vạch sản phẩm là bắt buộc.",
+                },
+            });
+        if (!quantity)
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: "Product quantity is required!",
+                    vn: "Số lượng sản phẩm là bắt buộc.",
+                },
+            });
+        if (!productQuery)
+            return res.status(404).json({
+                status: false,
+                statusCode: 404,
+                msg: {
+                    en: `Product barcode "${barcode}" not found or has been removed, contact developer for more detail!`,
+                    vn: `Không tìm thấy mã vạch sản phẩm "${barcode}", hoặc đã bị gỡ bỏ, vui lòng liên hệ quản trị viên.`,
+                },
+            });
+        await productModel.findOneAndUpdate({ barcode }, { quantity });
+        return res.status(200).json({
+            status: false,
+            statusCode: 200,
+            msg: {
+                en: `The quantity of "${barcode}" has been updated successfully!`,
+                vn: `Đã cập nhật thành công số lượng của barcode "${barcode}".`,
             },
         });
     },

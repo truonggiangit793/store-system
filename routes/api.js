@@ -29,11 +29,13 @@ const {
     productGetDetail,
     productGetAll,
     productDelete,
+    productUpdateQuantity,
 } = require("./modules/products");
 
 /**
  * Account ================================================================
  */
+
 Router.post("/account/login", accountLogin);
 
 Router.post("/account/import", authentication, authorization.admin, multerService, accountImport);
@@ -81,6 +83,8 @@ Router.get("/product/get-detail", authentication, productGetDetail);
 Router.get("/product/get-all", authentication, productGetAll);
 
 Router.delete("/product/delete", authentication, productDelete);
+
+Router.patch("/product/update-quantity", authentication, authorization.admin, productUpdateQuantity);
 
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 

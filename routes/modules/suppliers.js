@@ -208,7 +208,7 @@ module.exports = {
     supplierDelete: async (req, res, next) => {
         // #swagger.tags = ['Suppliers']
         // #swagger.description = 'Admin can disable any suppliers through this endpoint.'
-        const supplierCode = req.query.supplierCode ? req.query.supplierCode.toUpperCase() : null;
+        const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
         const supplierQuery = await supplierModel.findOne({ supplierCode });
         if (!supplierCode)
             return res.status(200).json({

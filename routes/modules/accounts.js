@@ -211,7 +211,7 @@ module.exports = {
     accountDisable: async (req, res, next) => {
         // #swagger.tags = ['Accounts']
         // #swagger.description = 'Admin can disable any account through this endpoint.'
-        const userCode = req.query.userCode ? req.query.userCode.toUpperCase() : null;
+        const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
         const accountQuery = await accountModel.findOne({ userCode });
         if (!userCode)
             return res.status(200).json({
