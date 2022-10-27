@@ -118,39 +118,53 @@ module.exports = {
     supplierGetAll: async (req, res, next) => {
         // #swagger.tags = ['Suppliers']
         // #swagger.description = 'Admin can list of all suppliers by using this endpoint.'
-        const supplierList = await supplierModel.find({});
-        if (supplierList.length > 0) {
-            const resultData = await Promise.all(
-                supplierList.map(async (element) => {
-                    const productRefs = await productModel.find({
-                        supplierCode: element.supplierCode,
-                    });
-                    return {
-                        supplier: element,
-                        productRefs: {
-                            total: productRefs.length,
-                            data: productRefs.length > 0 ? productRefs : [],
-                        },
-                    };
-                })
-            );
-            return res.status(200).json({
-                status: true,
-                statusCode: 200,
-                msg: { en: "Get list of all suppliers.", vn: "Danh sách tất cả nhà cung cấp." },
-                result: {
-                    total: resultData.length,
-                    data: resultData,
-                },
+        const perPage = 25;
+        let page = parseInt(req.query.page) || 1;
+        supplierModel
+            .find({})
+            .skip(perPage * page - perPage)
+            .limit(perPage)
+            .exec((err, supplierList) => {
+                supplierModel.countDocuments(async (err, totalSuppliers) => {
+                    if (err) return next(err);
+                    const pageTotal = Math.ceil(totalSuppliers / perPage);
+                    if (supplierList.length > 0) {
+                        const resultData = await Promise.all(
+                            supplierList.map(async (element) => {
+                                const productRefs = await productModel.find({
+                                    supplierCode: element.supplierCode,
+                                });
+                                return {
+                                    supplier: element,
+                                    productRefs: {
+                                        total: productRefs.length,
+                                        data: productRefs.length > 0 ? productRefs : [],
+                                    },
+                                };
+                            })
+                        );
+                        return res.status(200).json({
+                            status: true,
+                            statusCode: 200,
+                            msg: { en: "Get list of all suppliers.", vn: "Danh sách tất cả nhà cung cấp." },
+                            curentPage: page,
+                            totalSuppliers,
+                            pageTotal,
+                            result: {
+                                perPage: supplierList.length,
+                                data: resultData,
+                            },
+                        });
+                    } else {
+                        return res.status(200).json({
+                            status: true,
+                            statusCode: 200,
+                            msg: { en: "There is no data.", vn: "Danh sách trống, không có dữ liệu nào." },
+                            result: [],
+                        });
+                    }
+                });
             });
-        } else {
-            return res.status(200).json({
-                status: true,
-                statusCode: 200,
-                msg: { en: "There is no data.", vn: "Danh sách trống, không có dữ liệu nào." },
-                result: [],
-            });
-        }
     },
     supplierGetDetail: async (req, res, next) => {
         // #swagger.tags = ['Suppliers']

@@ -503,6 +503,11 @@
             "name": "token",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -731,6 +736,11 @@
           },
           {
             "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "page",
             "in": "query",
             "type": "string"
           }
