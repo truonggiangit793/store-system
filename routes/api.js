@@ -30,6 +30,7 @@ const {
     productGetDetail,
     productGetAll,
     productGetOutOfStock,
+    productOutOfStockExport,
     productDelete,
     productUpdateQuantity,
 } = require("./modules/products");
@@ -87,6 +88,8 @@ Router.get("/product/get-detail", authentication, productGetDetail);
 Router.get("/product/get-all", authentication, productGetAll);
 
 Router.get("/product/get-out-of-stock", authentication, productGetOutOfStock);
+
+Router.get("/product/out-of-stock/export", authentication, productOutOfStockExport);
 
 Router.delete("/product/delete", authentication, productDelete);
 

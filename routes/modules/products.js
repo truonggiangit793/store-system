@@ -1,4 +1,9 @@
 const xlsxFile = require("read-excel-file/node");
+const fs = require("fs");
+const path = require("path");
+const mime = require("mime");
+const excel = require("excel4node");
+const workbook = new excel.Workbook();
 
 const productModel = require("../../models/product");
 const supplierModel = require("../../models/supplier");
@@ -334,6 +339,80 @@ module.exports = {
                     }
                 });
             });
+    },
+    productOutOfStockExport: async (req, res, next) => {
+        // #swagger.tags = ['Products']
+        // #swagger.description = 'Use this api endpoint for exporting list out of stock.'
+        const requestID = req.query.requestID || 0;
+        const date = Math.round(new Date().getTime() / 1000);
+        const dateToCompare = Math.round(new Date().getTime() / 1000) + 60;
+        console.log({ date, dateToCompare });
+        if (!requestID || requestID < date) {
+            return res.status(400).json({
+                status: false,
+                statusCode: 400,
+                msg: {
+                    en: "Invalid request ID!",
+                    vn: "Mã yêu cầu không hợp lệ.",
+                },
+                use_this_for_test: {
+                    date: date.toString(),
+                    dateToCompare: dateToCompare.toString(),
+                },
+            });
+        } else {
+            const dir = path.resolve(__dirname, "../", "../", "tmp");
+            const exportedFile = dir + "/tmp.xlsx";
+            !fs.existsSync(dir) ? fs.mkdirSync(dir) : null;
+            const worksheet = workbook.addWorksheet("Master");
+            const titleStyle = workbook.createStyle({ font: { color: "#000000", size: 12, bold: true } });
+            const normalStyle = workbook.createStyle({ font: { color: "#000000", size: 12 } });
+            worksheet.cell(1, 1).string("Barcode").style(titleStyle);
+            worksheet.cell(1, 2).string("Product name").style(titleStyle);
+            worksheet.cell(1, 3).string("Supplier Code").style(titleStyle);
+            worksheet.cell(1, 4).string("Supplier Name").style(titleStyle);
+            worksheet.cell(1, 5).string("Quantity").style(titleStyle);
+            await productModel.find({ quantity: 0 }).then((list) => {
+                if (list.length > 0) {
+                    list.forEach((product, index) => {
+                        worksheet
+                            .cell(index + 2, 1)
+                            .string(product.barcode)
+                            .style(normalStyle);
+                        worksheet
+                            .cell(index + 2, 2)
+                            .string(product.productName)
+                            .style(normalStyle);
+                        worksheet
+                            .cell(index + 2, 3)
+                            .string(product.supplierCode)
+                            .style(normalStyle);
+                        worksheet
+                            .cell(index + 2, 4)
+                            .string(product.supplierName)
+                            .style(normalStyle);
+                        worksheet
+                            .cell(index + 2, 5)
+                            .string(product.quantity.toString())
+                            .style(normalStyle);
+                    });
+                } else {
+                    worksheet.cell(2, 1).string("No items").style(normalStyle);
+                }
+            });
+            workbook.write(exportedFile, (err, stats) => {
+                if (!err) {
+                    var filename = path.basename(exportedFile);
+                    var mimetype = mime.lookup(exportedFile);
+                    res.setHeader("Content-disposition", "attachment; filename=" + filename);
+                    res.setHeader("Content-type", mimetype);
+                    var filestream = fs.createReadStream(exportedFile);
+                    filestream.pipe(res);
+                } else {
+                    res.end("An error occured, please refesh this page!");
+                }
+            });
+        }
     },
     productDelete: async (req, res, next) => {
         // #swagger.tags = ['Products']

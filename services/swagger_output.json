@@ -846,6 +846,39 @@
         }
       }
     },
+    "/product/out-of-stock/export": {
+      "get": {
+        "tags": [
+          "Products"
+        ],
+        "description": "Use this api endpoint for exporting list out of stock.",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "requestID",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
     "/product/delete": {
       "delete": {
         "tags": [
