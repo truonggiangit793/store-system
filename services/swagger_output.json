@@ -512,6 +512,11 @@
             "type": "string"
           },
           {
+            "name": "perPage",
+            "in": "query",
+            "type": "string"
+          },
+          {
             "name": "page",
             "in": "query",
             "type": "string"
@@ -794,6 +799,11 @@
           },
           {
             "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "perPage",
             "in": "query",
             "type": "string"
           },

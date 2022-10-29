@@ -266,7 +266,12 @@ module.exports = {
     productGetAll: async (req, res, next) => {
         // #swagger.tags = ['Products']
         // #swagger.description = 'Admin can list of all products by using this endpoint.'
-        const perPage = 50;
+        const perPageMaxSize = 50;
+        let perPage = parseInt(req.query.perPage)
+            ? parseInt(req.query.perPage) >= perPageMaxSize
+                ? perPageMaxSize
+                : parseInt(req.query.perPage)
+            : perPageMaxSize;
         let page = parseInt(req.query.page) || 1;
         productModel
             .find({})

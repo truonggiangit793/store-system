@@ -118,7 +118,12 @@ module.exports = {
     supplierGetAll: async (req, res, next) => {
         // #swagger.tags = ['Suppliers']
         // #swagger.description = 'Admin can list of all suppliers by using this endpoint.'
-        const perPage = 25;
+        const perPageMaxSize = 20;
+        let perPage = parseInt(req.query.perPage)
+            ? parseInt(req.query.perPage) >= perPageMaxSize
+                ? perPageMaxSize
+                : parseInt(req.query.perPage)
+            : perPageMaxSize;
         let page = parseInt(req.query.page) || 1;
         supplierModel
             .find({})
