@@ -10,8 +10,8 @@ const authentication = async (req, res, next) => {
                 status: false,
                 statusCode: 401,
                 msg: {
-                    en: "Permission denied, access token is invalid.",
-                    vn: "Bạn không có quyền truy cập, access_token không hợp lệ.",
+                    en: "Access token is invalid or has been expired, please login again.",
+                    vn: "Access_token không hợp lệ hoặc đã hết hạn, vui lòng đăng nhập lại.",
                 },
             });
         } else {
