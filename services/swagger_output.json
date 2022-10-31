@@ -270,7 +270,7 @@
       }
     },
     "/account/change-password": {
-      "patch": {
+      "put": {
         "tags": [
           "Accounts"
         ],
@@ -971,7 +971,7 @@
       }
     },
     "/product/update-quantity": {
-      "patch": {
+      "put": {
         "tags": [
           "Products"
         ],

@@ -51,7 +51,7 @@ Router.get("/account/me", authentication, accountGetProfile);
 
 Router.put("/account/update-me", authentication, accountUpdateMe);
 
-Router.patch("/account/change-password", authentication, accountChangePassword);
+Router.put("/account/change-password", authentication, accountChangePassword);
 
 Router.get("/account/get-all", authentication, authorization.admin, accountGetAll);
 
@@ -93,7 +93,7 @@ Router.get("/product/out-of-stock/export", authentication, productOutOfStockExpo
 
 Router.delete("/product/delete", authentication, productDelete);
 
-Router.patch("/product/update-quantity", authentication, authorization.admin, productUpdateQuantity);
+Router.put("/product/update-quantity", authentication, authorization.admin, productUpdateQuantity);
 
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
