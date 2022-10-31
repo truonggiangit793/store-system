@@ -1,7 +1,7 @@
 {
   "swagger": "2.0",
   "info": {
-    "title": "Store System Rest API",
+    "title": "Store System RESTful API Document",
     "version": "1.0.0",
     "description": ""
   },

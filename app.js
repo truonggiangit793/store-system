@@ -24,7 +24,7 @@ const outputFile = "./services/swagger_output.json";
 const endpointsFiles = ["./routes/api.js"];
 const doc = {
     info: {
-        title: "Store System Rest API",
+        title: "Store System RESTful API Document",
     },
     host: `localhost:${process.env.PORT}/api/v1`,
 };
