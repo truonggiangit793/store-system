@@ -33,6 +33,7 @@ const {
     productOutOfStockExport,
     productDelete,
     productUpdateQuantity,
+    productUpdatePrice,
 } = require("./modules/products");
 
 /**
@@ -98,5 +99,7 @@ Router.put("/product/update-quantity", authentication, authorization.admin, prod
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
+
+Router.put("/product/update-price", authentication, authorization.admin, productUpdatePrice);
 
 module.exports = Router;

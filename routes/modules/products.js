@@ -581,4 +581,58 @@ module.exports = {
             });
         }
     },
+    productUpdatePrice: async function (req, res, next) {
+        // #swagger.tags = ['Products']
+        // #swagger.description = 'Admin can update product information through this endpoint.'
+        try {
+            const barcode = req.body.barcode ? req.body.barcode.toUpperCase() : null;
+            const unitCost = req.body.unitCost || null;
+            const productQuery = await productModel.findOne({ barcode });
+            const regex = /^([\u20AC]?[1-9]\d*\.\d{3}(?:,\d{2,9})?|[\u20AC]?[1-9]\d*(?:,\d{2,9})?|[\u20AC]?[1-9]\d*)$/;
+
+            if (!barcode)
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "Barcode is required!",
+                        vn: "Mã vạch sản phẩm là bắt buộc.",
+                    },
+                });
+            if (!unitCost || !regex.test(unitCost))
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "Product price is required and must be an valid price!",
+                        vn: "Giá sản phẩm là bắt buộc và phải là mệnh giá hợp lệ.",
+                    },
+                });
+            if (!productQuery)
+                return res.status(404).json({
+                    status: false,
+                    statusCode: 404,
+                    msg: {
+                        en: `Product barcode "${barcode}" not found or has been removed, contact developer for more detail!`,
+                        vn: `Không tìm thấy mã vạch sản phẩm "${barcode}", hoặc đã bị gỡ bỏ, vui lòng liên hệ quản trị viên.`,
+                    },
+                });
+            await productModel.findOneAndUpdate({ barcode }, { unitCost });
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `Price of product barcode "${barcode}" has been updated successfully!`,
+                    vn: `Giá của sản phẩm có barcode "${barcode}" đã được cập nhật thành công.`,
+                },
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                statusCode: 500,
+                msg: { en: "Interal Server Error" },
+                error: error.message,
+            });
+        }
+    },
 };
