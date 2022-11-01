@@ -55,6 +55,42 @@ module.exports = {
             });
         }
     },
+    transactionGetDetail: async (req, res, next) =>{
+        try{
+            const transactionID = parseInt(req.params.transactionID) || 0 ;
+            const transactionQuery = await transactionModel.findOne({ transactionID });
+    
+            if (!transactionQuery) {
+                return res.status(404).json({
+                    status: false,
+                    statusCode: 404,
+                    msg: {
+                        en: `This transaction not found. Please create a new transaction!`,
+                        vn: `Giao dịch này không tồn tại, vui lòng thực hiện lại.`,
+                    },
+                });
+            }
+
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `Get transaction ${transactionID} successfully!`,
+                    vn: `Thông tin chi tiết của giao dịch ${transactionID}`,
+                },
+                transactionQuery,
+            });
+
+        }catch(error) {
+            return res.status(500).json({
+                status: false,
+                statusCode: 500,
+                msg: { en: "Interal Server Error" },
+                error: error.message,
+            });
+        }
+    },
+
     transactionOrder: async (req, res, next) => {
         try {
             const transactionID = parseInt(req.params.transactionID) || 0;
@@ -105,6 +141,7 @@ module.exports = {
             // console.log(transactionQuery);
 
             // let cart = transactionQuery.details || [];
+            // console.log(cart);
 
             // cart.push({
             //     barcode: productQuery.barcode,

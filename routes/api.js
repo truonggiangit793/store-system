@@ -30,7 +30,7 @@ const {
 
 const { supplierImport, supplierRegister, supplierDelete, supplierGetAll, supplierGetDetail } = require("./modules/suppliers");
 
-const { transactionNew, transactionOrder } = require("./modules/transaction");
+const { transactionNew, transactionOrder, transactionGetDetail } = require("./modules/transaction");
 
 /**
  * Account ================================================================
@@ -104,6 +104,10 @@ Router.put("/product/update-price", authentication, authorization.admin, product
 
 Router.post("/transaction/new", authentication, transactionNew);
 
+Router.get("/transaction/:transactionID", authentication, transactionGetDetail);
+
 Router.post("/transaction/:transactionID/order", authentication, transactionOrder);
+
+
 
 module.exports = Router;
