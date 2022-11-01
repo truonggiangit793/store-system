@@ -90,7 +90,52 @@ module.exports = {
             });
         }
     },
+    transactionCancel: async (req, res, next) => {
+        try {
+            const transactionID = parseInt(req.params.transactionID) || 0;
+            const transactionQuery = await transactionModel.findOne({ transactionID });
 
+            if(!transactionID){
+                return res.status(404).json({
+                    status: false,
+                    statusCode: 404,
+                    msg: {
+                        en: `TransactionID product is require!`,
+                        vn: `Mã giao dịch là bắt buộc.`,
+                    },
+                });
+            }
+            if (!transactionQuery) {
+                return res.status(404).json({
+                    status: false,
+                    statusCode: 404,
+                    msg: {
+                        en: `This transaction not found. Please create a new transaction!`,
+                        vn: `Giao dịch này không tồn tại, vui lòng thực hiện lại.`,
+                    },
+                });
+            }
+            await transactionModel.remove({transactionID})
+
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `TransactionID "${transactionID}" has been removed successfully!`,
+                    vn: `Giao dịch "${transactionID}" đã được gỡ bỏ thành công.`,
+                },
+            });
+
+            
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                statusCode: 500,
+                msg: { en: "Interal Server Error" },
+                error: error.message,
+            });
+        }
+    },
     transactionOrder: async (req, res, next) => {
         try {
             const transactionID = parseInt(req.params.transactionID) || 0;
@@ -200,4 +245,72 @@ module.exports = {
             });
         }
     },
+    transactionToPay : async(req, res, next) => {
+        try{
+            const transactionID = parseInt(req.params.transactionID) || 0;
+            const transactionQuery = await transactionModel.findOne({ transactionID, payStatus : false});
+            if(!transactionID){
+                return res.status(404).json({
+                    status: false,
+                    statusCode: 404,
+                    msg: {
+                        en: `TransactionID product is require!`,
+                        vn: `Mã giao dịch là bắt buộc.`,
+                    },
+                });
+            }
+    
+            if (!transactionQuery) {
+                return res.status(404).json({
+                    status: false,
+                    statusCode: 404,
+                    msg: {
+                        en: `This transaction not found. Please create a new transaction!`,
+                        vn: `Giao dịch này không tồn tại, vui lòng thực hiện lại.`,
+                    },
+                });
+            }
+            const cash = req.body.cash ? parseInt(req.body.cash) : parseInt(transactionQuery.totalPrice);
+            if(cash < parseInt(transactionQuery.totalPrice)){
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: `Transaction faild - Don't have enough money!`,
+                        vn: `Giao dịch "${transactionID}" thất bại - không đủ tiền.`,
+                    },
+                });
+            }
+            const changeDue = cash - parseInt(transactionQuery.totalPrice);
+
+
+            await transactionModel.findOneAndUpdate({transactionID}, {payStatus : true, cash, changeDue})
+
+            transactionQuery.details.forEach(async (item) => {
+                product = await productModel.findOne({barcode : item.barcode});
+                await productModel.findOneAndUpdate({barcode : item.barcode}, { quantity : product.quantity - item.qty})
+            })
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `Transaction "${transactionID}" has been paid successfully!`,
+                    vn: `Giao dịch "${transactionID}" được thanh toán thành công.`,
+                },
+            });
+        
+
+        }catch(error){
+            res.status(500).json({
+                status: false,
+                statusCode: 500,
+                msg: { en: "Interal Server Error" },
+                error: error.message,
+            });  
+        }
+
+
+
+    }
+
 };
