@@ -16,14 +16,6 @@ const {
 } = require("./modules/accounts");
 
 const {
-    supplierImport,
-    supplierRegister,
-    supplierDelete,
-    supplierGetAll,
-    supplierGetDetail,
-} = require("./modules/suppliers");
-
-const {
     productImport,
     productQuantityImport,
     productRegister,
@@ -35,6 +27,10 @@ const {
     productUpdateQuantity,
     productUpdatePrice,
 } = require("./modules/products");
+
+const { supplierImport, supplierRegister, supplierDelete, supplierGetAll, supplierGetDetail } = require("./modules/suppliers");
+
+const { transactionNew, transactionOrder } = require("./modules/transaction");
 
 /**
  * Account ================================================================
@@ -101,5 +97,13 @@ Router.get("/product/download-example", authentication, downloadExample.download
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
 Router.put("/product/update-price", authentication, authorization.admin, productUpdatePrice);
+
+/**
+ * Transaction ================================================================
+ */
+
+Router.post("/transaction/new", authentication, transactionNew);
+
+Router.post("/transaction/:transactionID/order", authentication, transactionOrder);
 
 module.exports = Router;
