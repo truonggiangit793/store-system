@@ -30,7 +30,13 @@ const {
 
 const { supplierImport, supplierRegister, supplierDelete, supplierGetAll, supplierGetDetail } = require("./modules/suppliers");
 
-const { transactionNew, transactionOrder, transactionGetDetail, transactionCancel, transactionToPay } = require("./modules/transaction");
+const {
+    transactionNew,
+    transactionOrder,
+    transactionGetDetail,
+    transactionCancel,
+    transactionToPay,
+} = require("./modules/transaction");
 
 /**
  * Account ================================================================
@@ -111,8 +117,5 @@ Router.post("/transaction/:transactionID/order", authentication, transactionOrde
 Router.delete("/transaction/:transactionID/delete", authentication, transactionCancel);
 
 Router.post("/transaction/:transactionID/pay", authentication, transactionToPay);
-
-
-
 
 module.exports = Router;

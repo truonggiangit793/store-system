@@ -55,11 +55,11 @@ module.exports = {
             });
         }
     },
-    transactionGetDetail: async (req, res, next) =>{
-        try{
-            const transactionID = parseInt(req.params.transactionID) || 0 ;
+    transactionGetDetail: async (req, res, next) => {
+        try {
+            const transactionID = parseInt(req.params.transactionID) || 0;
             const transactionQuery = await transactionModel.findOne({ transactionID });
-    
+
             if (!transactionQuery) {
                 return res.status(404).json({
                     status: false,
@@ -80,8 +80,7 @@ module.exports = {
                 },
                 transactionQuery,
             });
-
-        }catch(error) {
+        } catch (error) {
             return res.status(500).json({
                 status: false,
                 statusCode: 500,
@@ -95,7 +94,7 @@ module.exports = {
             const transactionID = parseInt(req.params.transactionID) || 0;
             const transactionQuery = await transactionModel.findOne({ transactionID });
 
-            if(!transactionID){
+            if (!transactionID) {
                 return res.status(404).json({
                     status: false,
                     statusCode: 404,
@@ -115,7 +114,7 @@ module.exports = {
                     },
                 });
             }
-            await transactionModel.remove({transactionID})
+            await transactionModel.remove({ transactionID });
 
             return res.status(200).json({
                 status: true,
@@ -125,8 +124,6 @@ module.exports = {
                     vn: `Giao dịch "${transactionID}" đã được gỡ bỏ thành công.`,
                 },
             });
-
-            
         } catch (error) {
             return res.status(500).json({
                 status: false,
@@ -146,8 +143,8 @@ module.exports = {
             const productQuery = await productModel.findOne({ barcode });
             const transactionQuery = await transactionModel.findOne({ transactionID });
 
-            console.log(barcode)
-            if(!barcode){
+            console.log(barcode);
+            if (!barcode) {
                 return res.status(404).json({
                     status: false,
                     statusCode: 404,
@@ -193,38 +190,36 @@ module.exports = {
 
             let cart = transactionQuery.details || [];
 
-            if(cart.length == 0){
+            if (cart.length == 0) {
                 cart.push({
                     barcode: productQuery.barcode,
                     productName: productQuery.productName,
                     unitCost: productQuery.unitCost,
-                    qty : productQtyToOrder,
+                    qty: productQtyToOrder,
                 });
-            }else{
-                const found = cart.some(el => el.barcode === barcode);
-                if(found){
-                    cart.forEach(item => {
-                        if(item.barcode == barcode){
+            } else {
+                const found = cart.some((el) => el.barcode === barcode);
+                if (found) {
+                    cart.forEach((item) => {
+                        if (item.barcode == barcode) {
                             item.qty += productQtyToOrder;
                         }
                     });
-                }else{
+                } else {
                     cart.push({
                         barcode: productQuery.barcode,
                         productName: productQuery.productName,
                         unitCost: productQuery.unitCost,
-                        qty : productQtyToOrder,
+                        qty: productQtyToOrder,
                     });
                 }
-
             }
-           
-            
+
             await transactionModel.findOneAndUpdate(
                 { transactionID },
                 {
                     details: cart,
-                    totalPrice: transactionQuery.totalPrice + productQuery.unitCost*productQtyToOrder,
+                    totalPrice: transactionQuery.totalPrice + productQuery.unitCost * productQtyToOrder,
                 }
             );
 
@@ -245,11 +240,11 @@ module.exports = {
             });
         }
     },
-    transactionToPay : async(req, res, next) => {
-        try{
+    transactionToPay: async (req, res, next) => {
+        try {
             const transactionID = parseInt(req.params.transactionID) || 0;
-            const transactionQuery = await transactionModel.findOne({ transactionID, payStatus : false});
-            if(!transactionID){
+            const transactionQuery = await transactionModel.findOne({ transactionID, payStatus: false });
+            if (!transactionID) {
                 return res.status(404).json({
                     status: false,
                     statusCode: 404,
@@ -259,7 +254,7 @@ module.exports = {
                     },
                 });
             }
-    
+
             if (!transactionQuery) {
                 return res.status(404).json({
                     status: false,
@@ -271,7 +266,7 @@ module.exports = {
                 });
             }
             const cash = req.body.cash ? parseInt(req.body.cash) : parseInt(transactionQuery.totalPrice);
-            if(cash < parseInt(transactionQuery.totalPrice)){
+            if (cash < parseInt(transactionQuery.totalPrice)) {
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
@@ -283,13 +278,12 @@ module.exports = {
             }
             const changeDue = cash - parseInt(transactionQuery.totalPrice);
 
-
-            await transactionModel.findOneAndUpdate({transactionID}, {payStatus : true, cash, changeDue})
+            await transactionModel.findOneAndUpdate({ transactionID }, { payStatus: true, cash, changeDue });
 
             transactionQuery.details.forEach(async (item) => {
-                product = await productModel.findOne({barcode : item.barcode});
-                await productModel.findOneAndUpdate({barcode : item.barcode}, { quantity : product.quantity - item.qty})
-            })
+                product = await productModel.findOne({ barcode: item.barcode });
+                await productModel.findOneAndUpdate({ barcode: item.barcode }, { quantity: product.quantity - item.qty });
+            });
             return res.status(200).json({
                 status: true,
                 statusCode: 200,
@@ -298,19 +292,13 @@ module.exports = {
                     vn: `Giao dịch "${transactionID}" được thanh toán thành công.`,
                 },
             });
-        
-
-        }catch(error){
+        } catch (error) {
             res.status(500).json({
                 status: false,
                 statusCode: 500,
                 msg: { en: "Interal Server Error" },
                 error: error.message,
-            });  
+            });
         }
-
-
-
-    }
-
+    },
 };
