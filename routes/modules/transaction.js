@@ -101,6 +101,18 @@ module.exports = {
             const productQuery = await productModel.findOne({ barcode });
             const transactionQuery = await transactionModel.findOne({ transactionID });
 
+            console.log(barcode)
+            if(!barcode){
+                return res.status(404).json({
+                    status: false,
+                    statusCode: 404,
+                    msg: {
+                        en: `Barcode product is require!`,
+                        vn: `Mã vạch sản phẩm là bắt buộc.`,
+                    },
+                });
+            }
+
             if (!transactionQuery) {
                 return res.status(404).json({
                     status: false,
@@ -134,38 +146,51 @@ module.exports = {
                 });
             }
 
-            console.log({ transactionQuery });
+            let cart = transactionQuery.details || [];
 
-            console.log({ productQuery });
+            if(cart.length == 0){
+                cart.push({
+                    barcode: productQuery.barcode,
+                    productName: productQuery.productName,
+                    unitCost: productQuery.unitCost,
+                    qty : productQtyToOrder,
+                });
+            }else{
+                const found = cart.some(el => el.barcode === barcode);
+                if(found){
+                    cart.forEach(item => {
+                        if(item.barcode == barcode){
+                            item.qty += productQtyToOrder;
+                        }
+                    });
+                }else{
+                    cart.push({
+                        barcode: productQuery.barcode,
+                        productName: productQuery.productName,
+                        unitCost: productQuery.unitCost,
+                        qty : productQtyToOrder,
+                    });
+                }
 
-            // console.log(transactionQuery);
+            }
+           
+            
+            await transactionModel.findOneAndUpdate(
+                { transactionID },
+                {
+                    details: cart,
+                    totalPrice: transactionQuery.totalPrice + productQuery.unitCost*productQtyToOrder,
+                }
+            );
 
-            // let cart = transactionQuery.details || [];
-            // console.log(cart);
-
-            // cart.push({
-            //     barcode: productQuery.barcode,
-            //     productName: productQuery.productName,
-            //     unitCost: productQuery.unitCost,
-            // });
-
-            // transactionModel.findOneAndUpdate(
-            //     { transactionID },
-            //     {
-            //         details: cart,
-            //         totalPrice: transactionQuery.totalPrice + productQuery.unitCost,
-            //     }
-            // );
-
-            // return res.status(200).json({
-            //     status: true,
-            //     statusCode: 200,
-            //     msg: {
-            //         en: "A new product has been added into this transaction!",
-            //         vn: "Một sản phẩm đã được thêm vào giao dịch này.",
-            //     },
-            // });
-            res.end("testing");
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: "A new product has been added into this transaction!",
+                    vn: "Một sản phẩm đã được thêm vào giao dịch này.",
+                },
+            });
         } catch (error) {
             return res.status(500).json({
                 status: false,
