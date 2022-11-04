@@ -8,6 +8,7 @@ const phoneNumberValidator = require("validate-phone-number-node-js");
 
 module.exports = {
     transactionNew: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
         try {
             const lengthID = 10;
             const transactionID = Math.floor(Math.pow(10, lengthID - 1) + Math.random() * 9 * Math.pow(10, lengthID - 1));
@@ -56,6 +57,7 @@ module.exports = {
         }
     },
     transactionGetDetail: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
         try {
             const transactionID = parseInt(req.params.transactionID) || 0;
             const transactionQuery = await transactionModel.findOne({ transactionID });
@@ -90,6 +92,7 @@ module.exports = {
         }
     },
     transactionCancel: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
         try {
             const transactionID = parseInt(req.params.transactionID) || 0;
             const transactionQuery = await transactionModel.findOne({ transactionID });
@@ -134,6 +137,7 @@ module.exports = {
         }
     },
     transactionOrder: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
         try {
             const transactionID = parseInt(req.params.transactionID) || 0;
             const token = req.query.token || req.headers["x-access-token"];
@@ -241,6 +245,7 @@ module.exports = {
         }
     },
     transactionToPay: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
         try {
             const transactionID = parseInt(req.params.transactionID) || 0;
             const transactionQuery = await transactionModel.findOne({ transactionID, payStatus: false });
