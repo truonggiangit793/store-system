@@ -228,7 +228,7 @@ module.exports = {
             });
             product.save();
             return res.status(200).json({
-                status: false,
+                status: true,
                 statusCode: 200,
                 msg: {
                     en: `The "${barcode}" has been registered successfully!`,
