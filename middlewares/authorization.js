@@ -13,7 +13,7 @@ const authorization = {
                     });
                 } else {
                     console.log("\x1b[36m%s\x1b[0m", "authorization", { payload });
-                    if (payload.data.role ? payload.data.role.toUpperCase() : null == "ADMIN") {
+                    if (payload.data && payload.data.role.toUpperCase() == "ADMIN") {
                         return next();
                     } else {
                         return res.status(401).json({
