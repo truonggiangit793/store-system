@@ -38,6 +38,13 @@ const {
     transactionToPay,
 } = require("./modules/transaction");
 
+
+const {
+    checkInTime,
+    EmployeeGetAll,
+    checkOutTime
+} = require("./modules/employee");
+
 /**
  * Account ================================================================
  */
@@ -119,3 +126,11 @@ Router.delete("/transaction/:transactionID/delete", authentication, transactionC
 Router.post("/transaction/:transactionID/pay", authentication, transactionToPay);
 
 module.exports = Router;
+
+/**
+ * Employee ================================================================
+ */
+
+ Router.post("/employee/checkin", checkInTime);
+ Router.post("/employee/checkout", checkOutTime);
+ Router.get("/employee/getAll", EmployeeGetAll);
