@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const transactionModel = require("../models/transaction");
 const authorization = {
     admin: async (req, res, next) => {
         try {
@@ -24,6 +25,29 @@ const authorization = {
                 error: error.message,
             });
         }
+    },
+    checkPayStatus: async (req, res, next) => {
+        const transactionID = req.params.transactionID || null;
+        const transactionQuery = await transactionModel.findOne({ transactionID });
+        if (!transactionID)
+            return res.status(404).json({
+                status: false,
+                statusCode: 404,
+                msg: {
+                    en: `This transaction not found. Please create a new transaction!`,
+                    vn: `Giao dịch này không tồn tại, vui lòng thực hiện lại.`,
+                },
+            });
+        if (transactionQuery.payStatus)
+            return res.status(404).json({
+                status: false,
+                statusCode: 404,
+                msg: {
+                    en: "Permission denied, this transaction has been paid.",
+                    vn: "Bạn không được phép thực hiện. Giao dịch này đã được thanh toán.",
+                },
+            });
+        return next();
     },
 };
 

@@ -122,15 +122,15 @@ Router.post("/transaction/new", authentication, transactionNew);
 
 Router.get("/transaction/:transactionID", authentication, transactionGetDetail);
 
-Router.post("/transaction/:transactionID/order", authentication, transactionOrder);
+Router.post("/transaction/:transactionID/order", authentication, authorization.checkPayStatus, transactionOrder);
 
-Router.post("/transaction/:transactionID/add-customer", authentication, transactionAddCustomer);
+Router.post("/transaction/:transactionID/add-customer", authentication, authorization.checkPayStatus, transactionAddCustomer);
 
-Router.post("/transaction/:transactionID/toggle-point", authentication, transactionTogglePoint);
+Router.post("/transaction/:transactionID/toggle-point", authentication, authorization.checkPayStatus, transactionTogglePoint);
 
-Router.delete("/transaction/:transactionID/delete", authentication, transactionCancel);
+Router.delete("/transaction/:transactionID/delete", authentication, authorization.checkPayStatus, transactionCancel);
 
-Router.post("/transaction/:transactionID/pay", authentication, transactionToPay);
+Router.post("/transaction/:transactionID/pay", authentication, authorization.checkPayStatus, transactionToPay);
 
 /**
  * Employee ================================================================

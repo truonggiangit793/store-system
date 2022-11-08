@@ -138,7 +138,6 @@ module.exports = {
             const productQtyToOrder = req.body.qty ? parseInt(req.body.qty) : 1;
             const productQuery = await productModel.findOne({ barcode });
             const transactionQuery = await transactionModel.findOne({ transactionID });
-            let cart = transactionQuery.details || [];
             if (!barcode) {
                 return res.status(404).json({
                     status: false,
@@ -159,6 +158,7 @@ module.exports = {
                     },
                 });
             }
+            let cart = transactionQuery.details || [];
             if (!productQuery) {
                 return res.status(404).json({
                     status: false,
@@ -250,24 +250,61 @@ module.exports = {
                     },
                 });
             }
-            let totalPrice = parseInt(transactionQuery.totalPrice);
-            const customerQuery = customerModel.findOne({ customerID: transactionQuery.customerID });
-            if (customerQuery && transactionQuery.usePoint) {
-                totalPrice -= customerQuery.point;
-            }
-            const cash = req.body.cash ? parseInt(req.body.cash) : parseInt(totalPrice);
-            if (cash < parseInt(totalPrice)) {
+            if (!transactionQuery.totalPrice || transactionQuery.totalPrice <= 0)
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
                     msg: {
-                        en: `Transaction faild - Don't have enough money!`,
-                        vn: `Giao dịch "${transactionID}" thất bại - không đủ tiền.`,
+                        en: `This transaction has no product to pay!`,
+                        vn: `Giao dịch này không có sản phẩm nào để thanh toán.`,
                     },
                 });
+
+            const customerQuery = await customerModel.findOne({ customerID: transactionQuery.customerID });
+            let totalPrice = parseInt(transactionQuery.totalPrice);
+            let cash = req.body.cash ? parseInt(req.body.cash) : 0;
+            let disCount,
+                changeDue,
+                pointToUpdate = 0;
+            if (customerQuery && transactionQuery.usePoint) {
+                let customerPoint = customerQuery.point;
+                if (customerPoint > totalPrice) {
+                    disCount = totalPrice;
+                    totalPrice = 0;
+                    changeDue = cash;
+                    pointToUpdate = customerPoint - transactionQuery.totalPrice;
+                } else {
+                    disCount = customerPoint;
+                    totalPrice = totalPrice - disCount;
+                    pointToUpdate = 0;
+                    if (cash < totalPrice)
+                        return res.status(200).json({
+                            status: false,
+                            statusCode: 200,
+                            msg: {
+                                en: `Transaction faild - Don't have enough money!`,
+                                vn: `Giao dịch "${transactionID}" thất bại - không đủ tiền.`,
+                            },
+                        });
+                    changeDue = cash - totalPrice;
+                }
+                await customerModel.findOneAndUpdate({ customerID: customerQuery.customerID }, { point: pointToUpdate });
+            } else {
+                cash = req.body.cash ? parseInt(req.body.cash) : transactionQuery.totalPrice;
+                if (cash < totalPrice)
+                    return res.status(200).json({
+                        status: false,
+                        statusCode: 200,
+                        msg: {
+                            en: `Transaction faild - Don't have enough money!`,
+                            vn: `Giao dịch "${transactionID}" thất bại - không đủ tiền.`,
+                        },
+                    });
+                pointToUpdate = customerQuery ? customerQuery.point + Math.floor(totalPrice / 100) : 0;
+                if (customerQuery) await customerModel.findOneAndUpdate({ customerID: customerQuery.customerID }, { point: pointToUpdate });
             }
-            const changeDue = cash - parseInt(totalPrice);
-            await transactionModel.findOneAndUpdate({ transactionID }, { payStatus: true, cash, changeDue });
+            changeDue = Math.floor(cash - totalPrice);
+            await transactionModel.findOneAndUpdate({ transactionID }, { payStatus: true, cash, changeDue, disCount });
             transactionQuery.details.forEach(async (item) => {
                 product = await productModel.findOne({ barcode: item.barcode });
                 await productModel.findOneAndUpdate({ barcode: item.barcode }, { quantity: product.quantity - item.qty });
@@ -293,7 +330,7 @@ module.exports = {
         // #swagger.tags = ['Transaction']
         const customerID = req.body.customerID || null;
         const customerQuery = await customerModel.findOne({ customerID });
-        const transactionID = req.params.transaction || null;
+        const transactionID = req.params.transactionID || null;
         if (!customerID || !phoneNumberValidator.validate(customerID))
             return res.status(200).json({
                 status: false,
@@ -312,7 +349,9 @@ module.exports = {
                     vn: `${customerID} chưa được đăng ký thành viên, vui lòng đăng ký trước khi thực hiện.`,
                 },
             });
-        await transactionModel.findOneAndUpdate({ transactionID }, { customerID });
+        const a = await transactionModel.findOne({ transactionID });
+        console.log(a);
+        await transactionModel.findOneAndUpdate({ transactionID }, { customerID: customerID.toUpperCase() });
         return res.status(200).json({
             status: true,
             statusCode: 200,
@@ -343,6 +382,16 @@ module.exports = {
                 msg: {
                     en: `This transaction not found. Please create a new transaction!`,
                     vn: `Giao dịch này không tồn tại, vui lòng thực hiện lại.`,
+                },
+            });
+        }
+        if (!transactionQuery.customerID) {
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: "This transaction has not added customer to use point!",
+                    vn: "Giao dịch này chưa thêm khách hàng để sử dụng điểm.",
                 },
             });
         }
