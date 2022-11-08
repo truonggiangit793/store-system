@@ -16,7 +16,6 @@ const authentication = async (req, res, next) => {
                     },
                 });
             } else {
-                console.log("\x1b[36m%s\x1b[0m", "authentication", { payload });
                 const accountQuery = await accountModel.findOne({ userCode: payload.data.userCode });
                 if (token == accountQuery.access_token) {
                     return next();

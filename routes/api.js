@@ -36,14 +36,13 @@ const {
     transactionGetDetail,
     transactionCancel,
     transactionToPay,
+    transactionAddCustomer,
+    transactionTogglePoint,
 } = require("./modules/transaction");
 
+const { checkInTime, EmployeeGetAll, checkOutTime } = require("./modules/employee");
 
-const {
-    checkInTime,
-    EmployeeGetAll,
-    checkOutTime
-} = require("./modules/employee");
+const { customerNew } = require("./modules/customer");
 
 /**
  * Account ================================================================
@@ -107,9 +106,13 @@ Router.put("/product/update-quantity", authentication, authorization.admin, prod
 
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
-Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
-
 Router.put("/product/update-price", authentication, authorization.admin, productUpdatePrice);
+
+/**
+ * Customer ================================================================
+ */
+
+Router.post("/customer/new", authentication, customerNew);
 
 /**
  * Transaction ================================================================
@@ -121,16 +124,22 @@ Router.get("/transaction/:transactionID", authentication, transactionGetDetail);
 
 Router.post("/transaction/:transactionID/order", authentication, transactionOrder);
 
+Router.post("/transaction/:transactionID/add-customer", authentication, transactionAddCustomer);
+
+Router.post("/transaction/:transactionID/toggle-point", authentication, transactionTogglePoint);
+
 Router.delete("/transaction/:transactionID/delete", authentication, transactionCancel);
 
 Router.post("/transaction/:transactionID/pay", authentication, transactionToPay);
-
-module.exports = Router;
 
 /**
  * Employee ================================================================
  */
 
- Router.post("/employee/checkin", checkInTime);
- Router.post("/employee/checkout", checkOutTime);
- Router.get("/employee/getAll", EmployeeGetAll);
+Router.post("/employee/checkin", checkInTime);
+
+Router.post("/employee/checkout", checkOutTime);
+
+Router.get("/employee/getAll", EmployeeGetAll);
+
+module.exports = Router;

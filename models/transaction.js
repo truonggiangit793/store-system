@@ -20,6 +20,14 @@ const transactionSchema = new mongoose.Schema(
             type: Object,
             default: [],
         },
+        customerID: {
+            type: String,
+            default: null,
+        },
+        usePoint: {
+            type: Boolean,
+            default: false,
+        },
         payStatus: {
             type: Boolean,
             default: false,
@@ -33,6 +41,10 @@ const transactionSchema = new mongoose.Schema(
             default: 0,
         },
         changeDue: {
+            type: Number,
+            default: 0,
+        },
+        disCount: {
             type: Number,
             default: 0,
         },
