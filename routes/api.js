@@ -43,6 +43,7 @@ const {
 const { checkInTime, EmployeeGetAll, checkOutTime } = require("./modules/employee");
 
 const { customerNew } = require("./modules/customer");
+const { checkInTime, CheckInOutGetAll, checkOutTime } = require("./modules/checkInOut");
 
 /**
  * Account ================================================================
@@ -133,13 +134,17 @@ Router.delete("/transaction/:transactionID/delete", authentication, authorizatio
 Router.post("/transaction/:transactionID/pay", authentication, authorization.checkPayStatus, transactionToPay);
 
 /**
- * Employee ================================================================
+ * CheckInOut ================================================================
  */
 
-Router.post("/employee/checkin", checkInTime);
+Router.post("/checkInOut/checkin", checkInTime);
 
-Router.post("/employee/checkout", checkOutTime);
+Router.post("/checkInOut/checkout", checkOutTime);
 
-Router.get("/employee/getAll", EmployeeGetAll);
+Router.get("/checkInOut/getAll", CheckInOutGetAll);
 
-module.exports = Router;
+/**
+ * CheckInOut ================================================================
+ */
+
+Router.get("/employee/getAll");

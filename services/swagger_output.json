@@ -1365,10 +1365,10 @@
         }
       }
     },
-    "/employee/checkin": {
+    "/checkInOut/checkin": {
       "post": {
         "tags": [
-          "Employee"
+          "Check in - out"
         ],
         "description": "",
         "parameters": [
@@ -1395,10 +1395,10 @@
         }
       }
     },
-    "/employee/checkout": {
+    "/checkInOut/checkout": {
       "post": {
         "tags": [
-          "Employee"
+          "Check in - out"
         ],
         "description": "",
         "parameters": [
@@ -1425,13 +1425,29 @@
         }
       }
     },
-    "/employee/getAll": {
+    "/checkInOut/getAll": {
       "get": {
         "tags": [
-          "Employee"
+          "Check in - out"
         ],
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "filter",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "OK"

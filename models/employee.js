@@ -7,17 +7,13 @@ const employeeSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
-        checkIn: {
-            type: Date,
-            default: new Date(),
-        },
-        checkOut: {
-            type: Date,
-            default: null,
-        },
-        totalWorkTime: {
+        salary: {
             type: Number,
-            default: 0,
+            default: 25000,
+        },
+        timeSheets: {
+            type: Array,
+            default: [],
         },
     },
     {
