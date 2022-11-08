@@ -4,7 +4,9 @@ const jwt = require("jsonwebtoken");
 const xlsxFile = require("read-excel-file/node");
 const phoneNumberValidator = require("validate-phone-number-node-js");
 const accountModel = require("../../models/account");
+const employeeModel = require("../../models/employee");
 const adminConfig = require("../../configs/adminConfig");
+const roleConfig = require("../../configs/roleConfig");
 
 module.exports = {
     accountLogin: async (req, res, next) => {
@@ -104,6 +106,18 @@ module.exports = {
         try {
             rows.forEach(async (element, index) => {
                 if (index > 0) {
+                    if (element[5] == roleConfig.manager) {
+                        await employeeModel.findOneAndUpdate(
+                            { userCode: element[0].toUpperCase() },
+                            { preSalary: 40000 },
+                            { upsert: true, new: true, setDefaultsOnInsert: true }
+                        );
+                    } else {
+                        await employeeModel.findOneAndUpdate(
+                            { userCode: element[0].toUpperCase() },
+                            { upsert: true, new: true, setDefaultsOnInsert: true }
+                        );
+                    }
                     await accountModel.findOneAndUpdate(
                         { userCode: element[0].toUpperCase() },
                         {
@@ -112,7 +126,7 @@ module.exports = {
                             email: element[2],
                             phoneNumber: element[3],
                             password: bcrypt.hashSync(element[4], bcrypt.genSaltSync(10)),
-                            role: element[5] ? (element[5].toUpperCase() == "ADMIN" ? "STAFF" : element[5].toUpperCase()) : null,
+                            role: element[5] ? (element[5].toUpperCase() == roleConfig.admin ? roleConfig.cashier : element[5].toUpperCase()) : null,
                         },
                         { upsert: true, new: true, setDefaultsOnInsert: true }
                     );
@@ -186,8 +200,8 @@ module.exports = {
                         vn: "Mật khẩu là bắt buộc và phải từ 6 ký tự trở lên.",
                     },
                 });
-            const validRole = role == "MANAGER" || role == "STAFF";
-            if (!role || !validRole)
+            const validRole = role == roleConfig.manager && role == roleConfig.cashier && role != roleConfig.admin;
+            if (!role || validRole)
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
@@ -213,6 +227,10 @@ module.exports = {
                 password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
                 role,
             });
+            if (role == roleConfig.manager) {
+                const newEmployee = new employeeModel({ userCode, preSalary: 40000 });
+                newEmployee.save();
+            }
             newUser.save();
             return res.status(200).json({
                 status: true,

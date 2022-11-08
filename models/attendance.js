@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseDelete = require("mongoose-delete");
-const { Integer } = require("read-excel-file");
 
-const checkInOutSchema = new mongoose.Schema(
+const attendanceSchema = new mongoose.Schema(
     {
         userCode: {
             type: String,
@@ -17,19 +16,18 @@ const checkInOutSchema = new mongoose.Schema(
             default: null,
         },
         totalWorkTime: {
-            type : Number,
-            default : 0
+            type: Number,
+            default: 0,
         },
-
     },
     {
         timestamps: true,
     }
 );
 
-checkInOutSchema.plugin(mongooseDelete, {
+attendanceSchema.plugin(mongooseDelete, {
     deletedAt: true,
     overrideMethods: "all",
 });
 
-module.exports = mongoose.model("CheckInOut", checkInOutSchema);
+module.exports = mongoose.model("Attendance", attendanceSchema);

@@ -1365,7 +1365,7 @@
         }
       }
     },
-    "/checkInOut/checkin": {
+    "/attendance/checkin": {
       "post": {
         "tags": [
           "Check in - out"
@@ -1395,7 +1395,7 @@
         }
       }
     },
-    "/checkInOut/checkout": {
+    "/attendance/checkout": {
       "post": {
         "tags": [
           "Check in - out"
@@ -1425,7 +1425,7 @@
         }
       }
     },
-    "/checkInOut/getAll": {
+    "/attendance/getAll": {
       "get": {
         "tags": [
           "Check in - out"
@@ -1452,6 +1452,17 @@
           "200": {
             "description": "OK"
           },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/employee/": {
+      "get": {
+        "description": "",
+        "parameters": [],
+        "responses": {
           "500": {
             "description": "Internal Server Error"
           }

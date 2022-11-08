@@ -1,7 +1,7 @@
 const xlsxFile = require("read-excel-file/node");
 
 // const productModel = require("../../models/product");
-const checkInOutModel = require("../../models/checkInOut");
+const checkInOutModel = require("../../models/attendance");
 const employeeModel = require("../../models/employee");
 const accountModel = require("../../models/account");
 const phoneNumberValidator = require("validate-phone-number-node-js");

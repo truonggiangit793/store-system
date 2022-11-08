@@ -40,11 +40,9 @@ const {
     transactionTogglePoint,
 } = require("./modules/transaction");
 
-const { checkInTime, EmployeeGetAll, checkOutTime } = require("./modules/employee");
-
 const { customerNew } = require("./modules/customer");
 
-const { checkInTime, CheckInOutGetAll, checkOutTime } = require("./modules/checkInOut");
+const { checkInTime, CheckInOutGetAll, checkOutTime } = require("./modules/attendance");
 
 const { employeeGetAll } = require("./modules/employee");
 
@@ -140,16 +138,16 @@ Router.post("/transaction/:transactionID/pay", authentication, authorization.che
  * CheckInOut ================================================================
  */
 
-Router.post("/checkInOut/checkin", checkInTime);
+Router.post("/attendance/checkin", checkInTime);
 
-Router.post("/checkInOut/checkout", checkOutTime);
+Router.post("/attendance/checkout", checkOutTime);
 
-Router.get("/checkInOut/getAll", CheckInOutGetAll);
+Router.get("/attendance/getAll", CheckInOutGetAll);
 
 /**
  * CheckInOut ================================================================
  */
 
-Router.get("/employee/getAll", employeeGetAll);
+Router.get("/employee/", employeeGetAll);
 
 module.exports = Router;

@@ -1,11 +1,12 @@
 const jwt = require("jsonwebtoken");
 const transactionModel = require("../models/transaction");
+const role = require("../configs/roleConfig");
 const authorization = {
     admin: async (req, res, next) => {
         try {
             const token = req.query.token || req.headers["x-access-token"] || null;
             jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
-                if (payload.data && payload.data.role.toUpperCase() == "ADMIN") {
+                if (payload.data && payload.data.role.toUpperCase() == role.admin) {
                     return next();
                 } else {
                     return res.status(401).json({

@@ -7,13 +7,21 @@ const employeeSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
-        salary: {
+        preSalary: {
             type: Number,
             default: 25000,
         },
-        timeSheets: {
-            type: Array,
-            default: [],
+        salaryMonth: {
+            type: Date,
+            default: null,
+        },
+        totalWorkTime: {
+            type: Number,
+            default: 0,
+        },
+        finalSalary: {
+            type: Number,
+            default: 0,
         },
     },
     {

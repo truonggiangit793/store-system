@@ -1,7 +1,7 @@
 const xlsxFile = require("read-excel-file/node");
 
 // const productModel = require("../../models/product");
-const checkInOutModel = require("../../models/checkInOut");
+const attendanceModel = require("../../models/attendance");
 const accountModel = require("../../models/account");
 const phoneNumberValidator = require("validate-phone-number-node-js");
 
@@ -23,7 +23,7 @@ module.exports = {
                     },
                 });
             if (accountQuery) {
-                const employee = new checkInOutModel({ userCode, checkIn });
+                const employee = new attendanceModel({ userCode, checkIn });
                 employee.save();
                 return res.status(200).json({
                     status: true,
@@ -55,7 +55,7 @@ module.exports = {
             const filter = req.query.filter || "all";
             const from = req.query.from || "";
             const to = req.query.to || "";
-            const employeeQuery = await checkInOutModel.find({});
+            const employeeQuery = await attendanceModel.find({});
             let data = [];
             if (employeeQuery) {
                 switch (filter) {
@@ -148,7 +148,7 @@ module.exports = {
         try {
             const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
             const accountQuery = await accountModel.findOne({ userCode });
-            const employeeQuery = await checkInOutModel.find({ userCode });
+            const employeeQuery = await attendanceModel.find({ userCode });
 
             if (!userCode)
                 return res.status(200).json({
@@ -167,77 +167,7 @@ module.exports = {
                     });
                     if (getEmployee) {
                         const totalWorkTime = Math.floor((today.getMinutes() - getEmployee[0].checkIn.getMinutes()) / 60);
-                        await checkInOutModel.findOneAndUpdate(
-                            {
-                                userCode: getEmployee[0].userCode,
-                                checkIn: getEmployee[0].checkIn,
-                            },
-                            { checkOut: today, totalWorkTime }
-                        );
-                        return res.status(200).json({
-                            status: true,
-                            statusCode: 200,
-                            msg: {
-                                en: "Check out successfully!",
-                                vn: "Check out thành công.",
-                            },
-                        });
-                    } else {
-                        return res.status(200).json({
-                            status: false,
-                            statusCode: 200,
-                            msg: {
-                                en: "This employee does not appear this day!",
-                                vn: "Nhân viên chưa có dữ liệu điểm danh hôm nay.",
-                            },
-                        });
-                    }
-                }
-            } else {
-                return res.status(200).json({
-                    status: false,
-                    statusCode: 200,
-                    msg: {
-                        en: "Account does not exist!",
-                        vn: "Tài khoản không tồn tại.",
-                    },
-                });
-            }
-        } catch (error) {
-            return res.status(500).json({
-                status: false,
-                statusCode: 500,
-                msg: { en: "Interal Server Error" },
-                error: error.message,
-            });
-        }
-    },
-    CaculateTimeKeeping: async (req, res, next) => {
-        // #swagger.tags = ['Check in - out']
-        try {
-            const dataDay = req.body.dataDay || null;
-            const dataMonth = req.body.dataMonth || null;
-            const accountQuery = await accountModel.findOne({ userCode });
-            const employeeQuery = await checkInOutModel.find({ userCode });
-
-            if (!userCode)
-                return res.status(200).json({
-                    status: false,
-                    statusCode: 200,
-                    msg: {
-                        en: "User account is required.",
-                        vn: "Mã số nhân viên là bắt buộc.",
-                    },
-                });
-            if (accountQuery) {
-                if (employeeQuery) {
-                    const today = new Date();
-                    const getEmployee = employeeQuery.filter((employee) => {
-                        return employee ? employee.checkIn.getDay() === today.getDay() : null;
-                    });
-                    if (getEmployee) {
-                        const totalWorkTime = today.getHours() - getEmployee[0].checkIn.getHours();
-                        await checkInOutModel.findOneAndUpdate(
+                        await attendanceModel.findOneAndUpdate(
                             {
                                 userCode: getEmployee[0].userCode,
                                 checkIn: getEmployee[0].checkIn,
