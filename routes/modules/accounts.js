@@ -112,11 +112,7 @@ module.exports = {
                             email: element[2],
                             phoneNumber: element[3],
                             password: bcrypt.hashSync(element[4], bcrypt.genSaltSync(10)),
-                            role: element[5]
-                                ? element[5].toUpperCase() == "ADMIN"
-                                    ? "STAFF"
-                                    : element[5].toUpperCase()
-                                : null,
+                            role: element[5] ? (element[5].toUpperCase() == "ADMIN" ? "STAFF" : element[5].toUpperCase()) : null,
                         },
                         { upsert: true, new: true, setDefaultsOnInsert: true }
                     );
