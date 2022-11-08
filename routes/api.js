@@ -41,9 +41,9 @@ const {
 
 const {
     checkInTime,
-    EmployeeGetAll,
+    CheckInOutGetAll,
     checkOutTime
-} = require("./modules/employee");
+} = require("./modules/checkInOut");
 
 /**
  * Account ================================================================
@@ -128,11 +128,18 @@ Router.post("/transaction/:transactionID/pay", authentication, transactionToPay)
 module.exports = Router;
 
 /**
- * Employee ================================================================
+ * CheckInOut ================================================================
  */
 
- Router.post("/employee/checkin", checkInTime);
+ Router.post("/checkInOut/checkin", checkInTime);
 
- Router.post("/employee/checkout", checkOutTime);
+ Router.post("/checkInOut/checkout", checkOutTime);
  
- Router.get("/employee/getAll", EmployeeGetAll);
+ Router.get("/checkInOut/getAll", CheckInOutGetAll);
+
+ 
+/**
+ * CheckInOut ================================================================
+ */
+
+ Router.get("/employee/getAll", );

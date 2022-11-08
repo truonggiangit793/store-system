@@ -8,18 +8,14 @@ const employeeSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
-        checkIn: {
-            type: Date,
-            default: new Date(),
+        salary : {
+            type: Number,
+            default : 25000 
         },
-        checkOut: {
-            type: Date,
-            default: null,
-        },
-        totalWorkTime: {
-            type : Number,
-            default : 0
-        },
+        timeSheets: {
+            type: Array,
+            default : []
+        }
 
     },
     {
