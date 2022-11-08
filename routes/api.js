@@ -36,14 +36,14 @@ const {
     transactionGetDetail,
     transactionCancel,
     transactionToPay,
+    transactionAddCustomer,
+    transactionTogglePoint,
 } = require("./modules/transaction");
 
+const { checkInTime, EmployeeGetAll, checkOutTime } = require("./modules/employee");
 
-const {
-    checkInTime,
-    CheckInOutGetAll,
-    checkOutTime
-} = require("./modules/checkInOut");
+const { customerNew } = require("./modules/customer");
+const { checkInTime, CheckInOutGetAll, checkOutTime } = require("./modules/checkInOut");
 
 const {
     employeeGetAll
@@ -111,9 +111,13 @@ Router.put("/product/update-quantity", authentication, authorization.admin, prod
 
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
-Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
-
 Router.put("/product/update-price", authentication, authorization.admin, productUpdatePrice);
+
+/**
+ * Customer ================================================================
+ */
+
+Router.post("/customer/new", authentication, customerNew);
 
 /**
  * Transaction ================================================================
@@ -123,27 +127,31 @@ Router.post("/transaction/new", authentication, transactionNew);
 
 Router.get("/transaction/:transactionID", authentication, transactionGetDetail);
 
-Router.post("/transaction/:transactionID/order", authentication, transactionOrder);
+Router.post("/transaction/:transactionID/order", authentication, authorization.checkPayStatus, transactionOrder);
 
-Router.delete("/transaction/:transactionID/delete", authentication, transactionCancel);
+Router.post("/transaction/:transactionID/add-customer", authentication, authorization.checkPayStatus, transactionAddCustomer);
 
-Router.post("/transaction/:transactionID/pay", authentication, transactionToPay);
+Router.post("/transaction/:transactionID/toggle-point", authentication, authorization.checkPayStatus, transactionTogglePoint);
 
-module.exports = Router;
+Router.delete("/transaction/:transactionID/delete", authentication, authorization.checkPayStatus, transactionCancel);
+
+Router.post("/transaction/:transactionID/pay", authentication, authorization.checkPayStatus, transactionToPay);
 
 /**
  * CheckInOut ================================================================
  */
 
- Router.post("/checkInOut/checkin", checkInTime);
+Router.post("/checkInOut/checkin", checkInTime);
 
- Router.post("/checkInOut/checkout", checkOutTime);
- 
- Router.get("/checkInOut/getAll", CheckInOutGetAll);
+Router.post("/checkInOut/checkout", checkOutTime);
 
- 
+Router.get("/checkInOut/getAll", CheckInOutGetAll);
+
 /**
  * CheckInOut ================================================================
  */
 
  Router.get("/employee/getAll", employeeGetAll);
+
+
+module.exports = Router;

@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const mongooseDelete = require("mongoose-delete");
-const { Integer } = require("read-excel-file");
 
 const employeeSchema = new mongoose.Schema(
     {
@@ -8,15 +7,14 @@ const employeeSchema = new mongoose.Schema(
             type: String,
             require: true,
         },
-        salary : {
+        salary: {
             type: Number,
-            default : 25000 
+            default: 25000,
         },
         timeSheets: {
             type: Array,
-            default : []
-        }
-
+            default: [],
+        },
     },
     {
         timestamps: true,
