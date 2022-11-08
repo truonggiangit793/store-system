@@ -132,5 +132,7 @@ module.exports = Router;
  */
 
  Router.post("/employee/checkin", checkInTime);
+
  Router.post("/employee/checkout", checkOutTime);
+ 
  Router.get("/employee/getAll", EmployeeGetAll);
