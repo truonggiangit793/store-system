@@ -45,6 +45,10 @@ const {
     checkOutTime
 } = require("./modules/checkInOut");
 
+const {
+    employeeGetAll
+} = require("./modules/employee");
+
 /**
  * Account ================================================================
  */
@@ -142,4 +146,4 @@ module.exports = Router;
  * CheckInOut ================================================================
  */
 
- Router.get("/employee/getAll", );
+ Router.get("/employee/getAll", employeeGetAll);
