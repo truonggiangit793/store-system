@@ -4,16 +4,18 @@ const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+const cors = require("cors");
 const swaggerAutogen = require("swagger-autogen")();
 
 const defineRoute = require("./routes/index");
 const db = require("./configs/database");
 
 const app = express();
+const corsOptions = { origin: "*", optionsSuccessStatus: 200 };
 
 // Connect to database
 db.connect();
-
+app.use(cors(corsOptions));
 app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
