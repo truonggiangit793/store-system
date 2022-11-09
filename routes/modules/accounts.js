@@ -106,7 +106,8 @@ module.exports = {
         try {
             rows.forEach(async (element, index) => {
                 if (index > 0) {
-                    if (element[5] == roleConfig.manager) {
+                    console.log(element[5].toUpperCase());
+                    if (element[5].toUpperCase() == roleConfig.manager) {
                         await employeeModel.findOneAndUpdate(
                             { userCode: element[0].toUpperCase() },
                             { preSalary: 40000 },
@@ -115,6 +116,7 @@ module.exports = {
                     } else {
                         await employeeModel.findOneAndUpdate(
                             { userCode: element[0].toUpperCase() },
+                            { preSalary: 25000 },
                             { upsert: true, new: true, setDefaultsOnInsert: true }
                         );
                     }
@@ -255,13 +257,14 @@ module.exports = {
         try {
             const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
             const accountQuery = await accountModel.findOne({ userCode });
+            const employeeQuery = await employeeModel.findOne({ userCode });
             if (!userCode)
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
                     msg: { en: "User account is required.", vn: "Tài khoản đăng nhập là bắt buộc." },
                 });
-            if (userCode == adminConfig.userCode)
+            if (userCode == adminConfig.admin)
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
@@ -270,8 +273,7 @@ module.exports = {
                         vn: "Bạn không có quyền hạn để xoá tài khoản này.",
                     },
                 });
-
-            if (!accountQuery)
+            if (!accountQuery || !employeeQuery)
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
@@ -280,6 +282,7 @@ module.exports = {
                         vn: "Tài khoản này không tồn tại.",
                     },
                 });
+            await employeeModel.deleteOne({ userCode });
             await accountModel.deleteOne({ userCode });
             return res.status(200).json({
                 status: true,
@@ -305,6 +308,7 @@ module.exports = {
             const token = req.query.token || req.headers["x-access-token"];
             jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
                 const accountQuery = await accountModel.findOne({ userCode: payload.data.userCode });
+                const employeeQuery = await employeeModel.findOne({ employeeCode: payload.data.userCode });
                 return res.status(200).json({
                     status: true,
                     statusCode: 200,
@@ -318,6 +322,7 @@ module.exports = {
                         userCode: accountQuery.userCode,
                         phoneNumber: accountQuery.phoneNumber,
                         lastLogin: accountQuery.lastLogin,
+                        preSalary: employeeQuery ? employeeQuery.preSalary : "Unknown",
                         role: accountQuery.role,
                         createdAt: accountQuery.createdAt,
                         updatedAt: accountQuery.updatedAt,

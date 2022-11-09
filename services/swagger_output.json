@@ -1368,7 +1368,7 @@
     "/attendance/checkin": {
       "post": {
         "tags": [
-          "Check in - out"
+          "Attendance"
         ],
         "description": "",
         "parameters": [
@@ -1398,7 +1398,7 @@
     "/attendance/checkout": {
       "post": {
         "tags": [
-          "Check in - out"
+          "Attendance"
         ],
         "description": "",
         "parameters": [
@@ -1425,13 +1425,23 @@
         }
       }
     },
-    "/attendance/getAll": {
+    "/attendance/get-all": {
       "get": {
         "tags": [
-          "Check in - out"
+          "Attendance"
         ],
         "description": "",
         "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
           {
             "name": "filter",
             "in": "query",
@@ -1451,6 +1461,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
           },
           "500": {
             "description": "Internal Server Error"

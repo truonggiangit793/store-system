@@ -329,8 +329,8 @@ module.exports = {
     transactionAddCustomer: async (req, res, next) => {
         // #swagger.tags = ['Transaction']
         const customerID = req.body.customerID || null;
-        const customerQuery = await customerModel.findOne({ customerID });
         const transactionID = req.params.transactionID || null;
+        const customerQuery = await customerModel.findOne({ customerID });
         if (!customerID || !phoneNumberValidator.validate(customerID))
             return res.status(200).json({
                 status: false,
@@ -349,8 +349,6 @@ module.exports = {
                     vn: `${customerID} chưa được đăng ký thành viên, vui lòng đăng ký trước khi thực hiện.`,
                 },
             });
-        const a = await transactionModel.findOne({ transactionID });
-        console.log(a);
         await transactionModel.findOneAndUpdate({ transactionID }, { customerID: customerID.toUpperCase() });
         return res.status(200).json({
             status: true,

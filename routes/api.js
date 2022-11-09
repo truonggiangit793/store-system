@@ -42,7 +42,7 @@ const {
 
 const { customerNew } = require("./modules/customer");
 
-const { checkInTime, CheckInOutGetAll, checkOutTime } = require("./modules/attendance");
+const { attendanceCheckIn, attendanceGetAll, attendanceCheckOut } = require("./modules/attendance");
 
 const { employeeGetAll } = require("./modules/employee");
 
@@ -135,17 +135,17 @@ Router.delete("/transaction/:transactionID/delete", authentication, authorizatio
 Router.post("/transaction/:transactionID/pay", authentication, authorization.checkPayStatus, transactionToPay);
 
 /**
- * CheckInOut ================================================================
+ * Attendace ================================================================
  */
 
-Router.post("/attendance/checkin", checkInTime);
+Router.post("/attendance/checkin", attendanceCheckIn);
 
-Router.post("/attendance/checkout", checkOutTime);
+Router.post("/attendance/checkout", attendanceCheckOut);
 
-Router.get("/attendance/getAll", CheckInOutGetAll);
+Router.get("/attendance/get-all", authentication, authorization.admin, attendanceGetAll);
 
 /**
- * CheckInOut ================================================================
+ * Employee ================================================================
  */
 
 Router.get("/employee/", employeeGetAll);
