@@ -232,9 +232,10 @@ module.exports = {
                 },
             });
         const dayFrom = parseInt(dateFrom.split("/")[0]);
-        const monthFrom = parseInt(dateFrom.split("/")[1]) - 1;
+        const monthFrom = parseInt(dateFrom.split("/")[1]);
         const yearFrom = parseInt(dateFrom.split("/")[2]);
         const date = new Date(yearFrom, monthFrom, dayFrom, 11, 0, 0);
+        // console.log(`${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`);
         if (attendanceList.length <= 0)
             return res.status(200).json({
                 status: true,
@@ -243,27 +244,31 @@ module.exports = {
                 result: [],
             });
         attendanceList.forEach((ele) => {
-            let checkIn = new Date(ele.checkIn);
-            let dateString = `${checkIn.getDate()}/${checkIn.getMonth()}/${checkIn.getFullYear()}`;
-            if (checkIn >= date) {
-                finalData.push({
-                    dateString,
-                    userCode: ele.userCode,
-                    totalWorkTime: ele.totalWorkTime,
-                });
-            }
+            // let checkIn = new Date(ele.checkIn);
+            let checkIn = new Date(ele.checkIn.toISOString());
+            let dateString = `${checkIn.getDate()}/${checkIn.getMonth() + 1}/${checkIn.getFullYear()}`;
+            console.log({ checkIn, dateString });
+            // if (checkIn >= date) {
+            //     finalData.push({
+            //         dateString,
+            //         userCode: ele.userCode,
+            //         totalWorkTime: ele.totalWorkTime,
+            //     });
+            // }
         });
-        const dateStringValue = finalData.reduce((result, currentObject, currentIndex) => {
-            if (!result.includes(currentObject.dateString)) result.push(currentObject.dateString);
-            return result;
-        }, []);
-        return res.status(200).json({
-            status: true,
-            statusCode: 200,
-            msg: { en: "", vn: "" },
-            result: dateStringValue.map((element) => {
-                return { dateString: element, data: finalData.filter((e) => e.dateString == element) };
-            }),
-        });
+        // console.log(finalData);
+        // const dateStringValue = finalData.reduce((result, currentObject, currentIndex) => {
+        //     if (!result.includes(currentObject.dateString)) result.push(currentObject.dateString);
+        //     return result;
+        // }, []);
+        // return res.status(200).json({
+        //     status: true,
+        //     statusCode: 200,
+        //     msg: { en: "", vn: "" },
+        //     result: dateStringValue.map((element) => {
+        //         return { dateString: element, data: finalData.filter((e) => e.dateString == element) };
+        //     }),
+        // });
+        res.end("end");
     },
 };

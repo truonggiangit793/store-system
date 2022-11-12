@@ -53,6 +53,7 @@ module.exports = {
                         statusCode: 200,
                         msg: { en: "Login successfully!", vn: "Đăng nhập thành công." },
                         token: jwtSignature,
+                        payload: accountQuery,
                     });
                 } else {
                     return res.status(401).json({
