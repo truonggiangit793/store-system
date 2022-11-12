@@ -68,8 +68,8 @@ module.exports = {
         // #swagger.tags = ['Suppliers']
         // #swagger.description = 'This endpoint provides method for registering each of supplier.'
         try {
-            const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
-            const supplierName = req.body.supplierName ? req.body.supplierName.topUpperCase() : null;
+            const supplierCode = req.body.supplierCode || null;
+            const supplierName = req.body.supplierName || null;
             const address = req.body.address || null;
             const phoneNumber = req.body.phoneNumber || null;
             const supplierQuery = await supplierModel.findOne({ supplierCode });
@@ -110,8 +110,8 @@ module.exports = {
                     },
                 });
             const supplier = new supplierModel({
-                supplierCode,
-                supplierName,
+                supplierCode: supplierCode.toUpperCase(),
+                supplierName: supplierName.toUpperCase(),
                 address,
                 phoneNumber,
             });
