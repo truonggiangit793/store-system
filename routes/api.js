@@ -4,6 +4,8 @@ const authentication = require("../middlewares/authentication");
 const multerService = require("../services/multer");
 const downloadExample = require("./modules/examples");
 
+const { test, end } = require("./modules/test");
+
 const {
     accountLogin,
     accountImport,
@@ -42,9 +44,11 @@ const {
 
 const { customerNew } = require("./modules/customer");
 
-const { attendanceCheckIn, attendanceGetAll, attendanceCheckOut } = require("./modules/attendance");
+const { attendanceCheckIn, attendanceGetAll, attendanceCheckOut, attendanceReport } = require("./modules/attendance");
 
 const { employeeGetAll } = require("./modules/employee");
+
+const { reportGetAllTransaction } = require("./modules/report");
 
 /**
  * Account ================================================================
@@ -102,7 +106,7 @@ Router.get("/product/get-out-of-stock", authentication, productGetOutOfStock);
 
 Router.get("/product/out-of-stock/export", authentication, productOutOfStockExport);
 
-Router.delete("/product/delete", authentication, productDelete);
+Router.delete("/product/delete/:barcode", authentication, productDelete);
 
 Router.put("/product/update-quantity", authentication, authorization.admin, productUpdateQuantity);
 
@@ -144,10 +148,20 @@ Router.post("/attendance/checkout", attendanceCheckOut);
 
 Router.get("/attendance/get-all", authentication, authorization.admin, attendanceGetAll);
 
+Router.get("/attendance/report", authentication, authorization.admin, attendanceReport);
+
 /**
  * Employee ================================================================
  */
 
 Router.get("/employee/", employeeGetAll);
+
+/**
+ * Report ================================================================
+ */
+
+Router.get("/report/transaction/get-all", authentication, authorization.admin, reportGetAllTransaction);
+
+Router.get("/test", test, end);
 
 module.exports = Router;

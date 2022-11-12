@@ -491,7 +491,7 @@ module.exports = {
         // #swagger.tags = ['Products']
         // #swagger.description = 'Admin can remove any products through this endpoint.'
         try {
-            const barcode = req.body.barcode ? req.body.barcode.toUpperCase() : null;
+            const barcode = req.params.barcode ? req.params.barcode.toUpperCase() : null;
             const productQuery = await productModel.findOne({ barcode });
             if (!barcode)
                 return res.status(200).json({
