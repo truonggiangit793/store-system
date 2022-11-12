@@ -1,5 +1,6 @@
 const attendanceModel = require("../../models/attendance");
 const accountModel = require("../../models/account");
+const { check } = require("prettier");
 
 module.exports = {
     attendanceCheckIn: async (req, res, next) => {
@@ -18,12 +19,22 @@ module.exports = {
                     },
                 });
             if (accountQuery) {
+                const noCheckOut = await attendanceModel.findOne({ userCode, checkOut: null });
+                if (noCheckOut)
+                    return res.status(200).json({
+                        status: true,
+                        statusCode: 200,
+                        msg: {
+                            en: `"${accountQuery.fullName}" have a shift that not checked-out!`,
+                            vn: `"${accountQuery.fullName}" có một ca chưa time-out.`,
+                        },
+                    });
                 const employee = new attendanceModel({ userCode, checkIn });
                 employee.save();
                 return res.status(200).json({
                     status: true,
                     statusCode: 200,
-                    msg: { en: "Check in successfully!", vn: "Check in thành công." },
+                    msg: { en: `"${accountQuery.fullName}" check in successfully!`, vn: `"${accountQuery.fullName}" check-in thành công.` },
                 });
             } else {
                 return res.status(200).json({
@@ -47,9 +58,10 @@ module.exports = {
     attendanceCheckOut: async (req, res, next) => {
         // #swagger.tags = ['Attendance']
         try {
+            const today = new Date();
             const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
             const accountQuery = await accountModel.findOne({ userCode });
-            const attendanceQuery = await attendanceModel.find({ userCode, checkOut: null });
+            const attendanceQuery = await attendanceModel.findOne({ userCode, checkOut: null });
             if (!userCode)
                 return res.status(200).json({
                     status: false,
@@ -68,54 +80,29 @@ module.exports = {
                         vn: "Tài khoản không tồn tại.",
                     },
                 });
-            if (!attendanceQuery || attendanceQuery.length < 0)
+            if (!attendanceQuery || attendanceQuery.checkIn.getDay() != today.getDay())
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
                     msg: {
-                        en: "No data.",
-                        vn: "Bạn chưa có dữ liệu điểm danh đầu vào nào.",
+                        en: `${accountQuery.fullName} does not have any shift today.`,
+                        vn: `${accountQuery.fullName} không có ca làm việc nào hôm nay.`,
                     },
                 });
-            if (attendanceQuery.length > 0) {
-                const today = new Date();
-                const isCheckinFirts = attendanceQuery.filter((employee) => employee.checkIn.getDay() === today.getDay())[0];
-                if (!isCheckinFirts)
-                    return res.status(200).json({
-                        status: false,
-                        statusCode: 200,
-                        msg: {
-                            en: "This employee does not appear this day!",
-                            vn: "Nhân viên chưa có dữ liệu điểm danh hôm nay.",
-                        },
-                    });
-                let totalWorkTime =
-                    today.getHours() * 60 + today.getMinutes() - (isCheckinFirts.checkIn.getHours() * 60 + isCheckinFirts.checkIn.getMinutes());
-                const hour = Math.floor(totalWorkTime / 60);
-                const minute = totalWorkTime % 60;
-                totalWorkTime = minute > 50 ? hour + 1 : hour;
-                await attendanceModel.findOneAndUpdate(
-                    { userCode: isCheckinFirts.userCode, checkIn: isCheckinFirts.checkIn },
-                    { checkOut: today, totalWorkTime }
-                );
-                return res.status(200).json({
-                    status: true,
-                    statusCode: 200,
-                    msg: {
-                        en: "Check out successfully!",
-                        vn: "Check out thành công.",
-                    },
-                });
-            } else {
-                return res.status(200).json({
-                    status: false,
-                    statusCode: 200,
-                    msg: {
-                        en: "No data.",
-                        vn: "Bạn chưa có dữ liệu điểm danh đầu vào nào.",
-                    },
-                });
-            }
+            let totalWorkTime =
+                today.getHours() * 60 + today.getMinutes() - (attendanceQuery.checkIn.getHours() * 60 + attendanceQuery.checkIn.getMinutes());
+            const hour = Math.floor(totalWorkTime / 60);
+            const minute = totalWorkTime % 60;
+            totalWorkTime = minute > 50 ? hour + 1 : hour;
+            await attendanceModel.findOneAndUpdate(
+                { userCode: attendanceQuery.userCode, checkIn: attendanceQuery.checkIn },
+                { checkOut: today, totalWorkTime }
+            );
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: { en: `"${accountQuery.fullName}" check out successfully!`, vn: `"${accountQuery.fullName}" check-out thành công.` },
+            });
         } catch (error) {
             return res.status(500).json({
                 status: false,
@@ -218,5 +205,65 @@ module.exports = {
                 error: error.message,
             });
         }
+    },
+    attendanceReport: async (req, res, next) => {
+        // #swagger.tags = ['Attendance']
+        let finalData = [];
+        const attendanceList = await attendanceModel.find({});
+        const dateFrom = req.query.dateFrom || "";
+        const dateTo = req.query.dateTo ? new Date(req.query.dateTo) : Date.now();
+        // Date format: DD-MM-YYYY
+        const validDate = dateFrom.includes("/")
+            ? dateFrom.split("/")[2].length == 4
+                ? parseInt(dateFrom.split("/")[0]) > 0 && parseInt(dateFrom.split("/")[0]) <= 31
+                    ? dateFrom.split("/")[1] > 0 && dateFrom.split("/")[1] <= 12
+                        ? true
+                        : false
+                    : false
+                : false
+            : false;
+        if (!dateFrom || !validDate)
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: "Please confirm what date from, and must be a valid date: DD/MM/YYYY",
+                    vn: "Vui lòng xác nhận thời điểm bắt đầu và phải là dữ liệu hợp lệ: DD/MM/YYYY",
+                },
+            });
+        const dayFrom = parseInt(dateFrom.split("/")[0]);
+        const monthFrom = parseInt(dateFrom.split("/")[1]) - 1;
+        const yearFrom = parseInt(dateFrom.split("/")[2]);
+        const date = new Date(yearFrom, monthFrom, dayFrom, 11, 0, 0);
+        if (attendanceList.length <= 0)
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: { en: "There is no data.", vn: "Danh sách trống, không có dữ liệu nào." },
+                result: [],
+            });
+        attendanceList.forEach((ele) => {
+            let checkIn = new Date(ele.checkIn);
+            let dateString = `${checkIn.getDate()}/${checkIn.getMonth()}/${checkIn.getFullYear()}`;
+            if (checkIn >= date) {
+                finalData.push({
+                    dateString,
+                    userCode: ele.userCode,
+                    totalWorkTime: ele.totalWorkTime,
+                });
+            }
+        });
+        const dateStringValue = finalData.reduce((result, currentObject, currentIndex) => {
+            if (!result.includes(currentObject.dateString)) result.push(currentObject.dateString);
+            return result;
+        }, []);
+        return res.status(200).json({
+            status: true,
+            statusCode: 200,
+            msg: { en: "", vn: "" },
+            result: dateStringValue.map((element) => {
+                return { dateString: element, data: finalData.filter((e) => e.dateString == element) };
+            }),
+        });
     },
 };
