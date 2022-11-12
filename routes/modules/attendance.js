@@ -211,9 +211,10 @@ module.exports = {
         let finalData = [];
         const attendanceList = await attendanceModel.find({});
         const dateFrom = req.query.dateFrom || "";
-        const dateTo = req.query.dateTo ? new Date(req.query.dateTo) : Date.now();
+        const dateTo = req.query.dateTo || "";
+        let timeTo = new Date();
         // Date format: DD-MM-YYYY
-        const validDate = dateFrom.includes("/")
+        const validDateFrom = dateFrom.includes("/")
             ? dateFrom.split("/")[2].length == 4
                 ? parseInt(dateFrom.split("/")[0]) > 0 && parseInt(dateFrom.split("/")[0]) <= 31
                     ? dateFrom.split("/")[1] > 0 && dateFrom.split("/")[1] <= 12
@@ -222,7 +223,16 @@ module.exports = {
                     : false
                 : false
             : false;
-        if (!dateFrom || !validDate)
+        const validDateTo = dateTo.includes("/")
+            ? dateTo.split("/")[2].length == 4
+                ? parseInt(dateTo.split("/")[0]) > 0 && parseInt(dateTo.split("/")[0]) <= 31
+                    ? dateTo.split("/")[1] > 0 && dateTo.split("/")[1] <= 12
+                        ? true
+                        : false
+                    : false
+                : false
+            : false;
+        if (!dateFrom || !validDateFrom)
             return res.status(200).json({
                 status: false,
                 statusCode: 200,
@@ -231,11 +241,36 @@ module.exports = {
                     vn: "Vui lòng xác nhận thời điểm bắt đầu và phải là dữ liệu hợp lệ: DD/MM/YYYY",
                 },
             });
+        if (dateTo) {
+            if (!validDateTo) {
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "The end date must be a valid date: DD/MM/YYYY",
+                        vn: "Thời điểm kết thúc và phải là dữ liệu hợp lệ: DD/MM/YYYY",
+                    },
+                });
+            }
+            const dayTo = parseInt(dateTo.split("/")[0]);
+            const monthTo = parseInt(dateTo.split("/")[1]) - 1;
+            const yearTo = parseInt(dateTo.split("/")[2]);
+            timeTo = new Date(yearTo, monthTo, dayTo, 11, 0, 0);
+        }
+
         const dayFrom = parseInt(dateFrom.split("/")[0]);
-        const monthFrom = parseInt(dateFrom.split("/")[1]);
+        const monthFrom = parseInt(dateFrom.split("/")[1]) - 1;
         const yearFrom = parseInt(dateFrom.split("/")[2]);
-        const date = new Date(yearFrom, monthFrom, dayFrom, 11, 0, 0);
-        // console.log(`${date.getDate()}/${date.getMonth()}/${date.getFullYear()}`);
+        const timeFrom = new Date(yearFrom, monthFrom, dayFrom, 11, 0, 0);
+        if (timeTo < timeFrom)
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: "The start date must be lager than the end date.",
+                    vn: "Thời điểm kết thúc phải lớn hơn thời điểm bắt đầu.",
+                },
+            });
         if (attendanceList.length <= 0)
             return res.status(200).json({
                 status: true,
@@ -244,31 +279,27 @@ module.exports = {
                 result: [],
             });
         attendanceList.forEach((ele) => {
-            // let checkIn = new Date(ele.checkIn);
             let checkIn = new Date(ele.checkIn.toISOString());
             let dateString = `${checkIn.getDate()}/${checkIn.getMonth() + 1}/${checkIn.getFullYear()}`;
-            console.log({ checkIn, dateString });
-            // if (checkIn >= date) {
-            //     finalData.push({
-            //         dateString,
-            //         userCode: ele.userCode,
-            //         totalWorkTime: ele.totalWorkTime,
-            //     });
-            // }
+            if (checkIn >= timeFrom && checkIn <= timeTo) {
+                finalData.push({
+                    dateString,
+                    userCode: ele.userCode,
+                    totalWorkTime: ele.totalWorkTime,
+                });
+            }
         });
-        // console.log(finalData);
-        // const dateStringValue = finalData.reduce((result, currentObject, currentIndex) => {
-        //     if (!result.includes(currentObject.dateString)) result.push(currentObject.dateString);
-        //     return result;
-        // }, []);
-        // return res.status(200).json({
-        //     status: true,
-        //     statusCode: 200,
-        //     msg: { en: "", vn: "" },
-        //     result: dateStringValue.map((element) => {
-        //         return { dateString: element, data: finalData.filter((e) => e.dateString == element) };
-        //     }),
-        // });
-        res.end("end");
+        const dateStringValue = finalData.reduce((result, currentObject, currentIndex) => {
+            if (!result.includes(currentObject.dateString)) result.push(currentObject.dateString);
+            return result;
+        }, []);
+        return res.status(200).json({
+            status: true,
+            statusCode: 200,
+            msg: { en: "", vn: "" },
+            result: dateStringValue.map((element) => {
+                return { dateString: element, data: finalData.filter((e) => e.dateString == element) };
+            }),
+        });
     },
 };

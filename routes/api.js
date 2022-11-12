@@ -60,7 +60,7 @@ Router.post("/account/import", authentication, authorization.admin, multerServic
 
 Router.post("/account/register", authentication, authorization.admin, accountRegister);
 
-Router.delete("/account/disable", authentication, authorization.admin, accountDisable);
+Router.delete("/account/disable/:userCode", authentication, authorization.admin, accountDisable);
 
 Router.get("/account/me", authentication, accountGetProfile);
 
@@ -84,7 +84,7 @@ Router.get("/supplier/get-detail", authentication, authorization.admin, supplier
 
 Router.get("/supplier/get-all", authentication, authorization.admin, supplierGetAll);
 
-Router.delete("/supplier/delete", authentication, authorization.admin, supplierDelete);
+Router.delete("/supplier/delete/:supplierCode", authentication, authorization.admin, supplierDelete);
 
 Router.get("/supplier/download-example", authentication, downloadExample.downloadSupplierExample);
 

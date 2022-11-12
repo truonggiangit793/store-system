@@ -256,7 +256,7 @@ module.exports = {
         // #swagger.tags = ['Accounts']
         // #swagger.description = 'Admin can disable any account through this endpoint.'
         try {
-            const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
+            const userCode = req.params.userCode ? req.params.userCode.toUpperCase() : null;
             const accountQuery = await accountModel.findOne({ userCode });
             const employeeQuery = await employeeModel.findOne({ userCode });
             if (!userCode)
@@ -429,7 +429,7 @@ module.exports = {
                             email: accountQuery.email,
                             phoneNumber: accountQuery.phoneNumber,
                             role: accountQuery.role,
-                            lastLogin,
+                            lastLogin: new Date(),
                         },
                     },
                     process.env.SECRET_KEY

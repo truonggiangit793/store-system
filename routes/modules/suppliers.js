@@ -250,7 +250,7 @@ module.exports = {
         // #swagger.tags = ['Suppliers']
         // #swagger.description = 'Admin can disable any suppliers through this endpoint.'
         try {
-            const supplierCode = req.body.supplierCode ? req.body.supplierCode.toUpperCase() : null;
+            const supplierCode = req.params.supplierCode ? req.params.supplierCode.toUpperCase() : null;
             const supplierQuery = await supplierModel.findOne({ supplierCode });
             if (!supplierCode)
                 return res.status(200).json({

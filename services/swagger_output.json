@@ -146,13 +146,19 @@
         }
       }
     },
-    "/account/disable": {
+    "/account/disable/{userCode}": {
       "delete": {
         "tags": [
           "Accounts"
         ],
         "description": "Admin can disable any account through this endpoint.",
         "parameters": [
+          {
+            "name": "userCode",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "x-access-token",
             "in": "header",
@@ -162,18 +168,6 @@
             "name": "token",
             "in": "query",
             "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "userCode": {
-                  "example": "any"
-                }
-              }
-            }
           }
         ],
         "responses": {
@@ -550,13 +544,19 @@
         }
       }
     },
-    "/supplier/delete": {
+    "/supplier/delete/{supplierCode}": {
       "delete": {
         "tags": [
           "Suppliers"
         ],
         "description": "Admin can disable any suppliers through this endpoint.",
         "parameters": [
+          {
+            "name": "supplierCode",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "x-access-token",
             "in": "header",
@@ -566,18 +566,6 @@
             "name": "token",
             "in": "query",
             "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "supplierCode": {
-                  "example": "any"
-                }
-              }
-            }
           }
         ],
         "responses": {
