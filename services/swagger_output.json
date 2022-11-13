@@ -1494,11 +1494,41 @@
         }
       }
     },
-    "/employee/": {
+    "/employee/salary/visualize": {
       "get": {
+        "tags": [
+          "Employee"
+        ],
         "description": "",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "type": "string"
+          }
+        ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
           "500": {
             "description": "Internal Server Error"
           }
