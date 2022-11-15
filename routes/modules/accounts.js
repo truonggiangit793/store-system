@@ -204,7 +204,7 @@ module.exports = {
                     },
                 });
             const validRole = role == roleConfig.manager && role == roleConfig.cashier && role != roleConfig.admin;
-            if (!role || validRole)
+            if (!role || !validRole)
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
