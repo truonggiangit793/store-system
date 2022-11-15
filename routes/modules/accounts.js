@@ -108,7 +108,7 @@ module.exports = {
             rows.forEach(async (element, index) => {
                 if (index > 0) {
                     console.log(element[5].toUpperCase());
-                    if (element[5].toUpperCase() == roleConfig.manager) {
+                    if (element[5].toUpperCase().includes("MANAGER")) {
                         await employeeModel.findOneAndUpdate(
                             { userCode: element[0].toUpperCase() },
                             { preSalary: 40000 },
@@ -203,46 +203,68 @@ module.exports = {
                         vn: "Mật khẩu là bắt buộc và phải từ 6 ký tự trở lên.",
                     },
                 });
-            const validRole = role == roleConfig.manager && role == roleConfig.cashier && role != roleConfig.admin;
-            if (!role || !validRole)
+            if (!role)
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
                     msg: {
-                        en: "Role is required and must be a valid role!",
-                        vn: "Phân quyền là bắt buộc và phải là phân quyền hợp lệ.",
+                        en: "Role is required!",
+                        vn: "Phân quyền là bắt buộc.",
                     },
                 });
-            if (accountQuery)
+            if (role == "ADMIN" || role == "ADMINISTRATOR)")
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
                     msg: {
-                        en: "Account has been already existed!",
-                        vn: "Tài khoản này đã tồn tại.",
+                        en: "Permission denied! Role must not be 'ADMINISTRATOR' or 'ADMIN'!",
+                        vn: "Phân quyền không hợp lệ.",
                     },
                 });
-            const newUser = new accountModel({
-                userCode,
-                fullName,
-                email,
-                phoneNumber,
-                password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
-                role,
-            });
-            if (role == roleConfig.manager) {
-                const newEmployee = new employeeModel({ userCode, preSalary: 40000 });
-                newEmployee.save();
+            if (role.includes("STAFF") || role.includes("MANAGER")) {
+                if (accountQuery)
+                    return res.status(200).json({
+                        status: false,
+                        statusCode: 200,
+                        msg: {
+                            en: "Account has been already existed!",
+                            vn: "Tài khoản này đã tồn tại.",
+                        },
+                    });
+                const newUser = new accountModel({
+                    userCode,
+                    fullName,
+                    email,
+                    phoneNumber,
+                    password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+                    role,
+                });
+                if (role.includes("MANAGER")) {
+                    const newEmployee = new employeeModel({ userCode, preSalary: 40000 });
+                    newEmployee.save();
+                } else {
+                    const newEmployee = new employeeModel({ userCode });
+                    newEmployee.save();
+                }
+                newUser.save();
+                return res.status(200).json({
+                    status: true,
+                    statusCode: 200,
+                    msg: {
+                        en: `Account name "${fullName}" has been registered successfully!`,
+                        vn: `Tài khoản "${fullName}" đã được tạo thành công.`,
+                    },
+                });
+            } else {
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "Permission denied! Invalid role!",
+                        vn: "Phân quyền không hợp lệ.",
+                    },
+                });
             }
-            newUser.save();
-            return res.status(200).json({
-                status: true,
-                statusCode: 200,
-                msg: {
-                    en: `Account name "${fullName}" has been registered successfully!`,
-                    vn: `Tài khoản "${fullName}" đã được tạo thành công.`,
-                },
-            });
         } catch (error) {
             return res.status(500).json({
                 status: false,
