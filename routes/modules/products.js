@@ -323,7 +323,7 @@ module.exports = {
                                 status: true,
                                 statusCode: 200,
                                 msg: { en: "Get list of all products.", vn: "Danh sách tất cả sản phẩm." },
-                                curentPage: page,
+                                currentPage: page,
                                 totalProducts,
                                 pageTotal,
                                 result: {

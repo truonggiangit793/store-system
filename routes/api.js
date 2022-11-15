@@ -40,6 +40,7 @@ const {
     transactionToPay,
     transactionAddCustomer,
     transactionTogglePoint,
+    transactionGetAll,
 } = require("./modules/transaction");
 
 const { customerNew } = require("./modules/customer");
@@ -125,6 +126,8 @@ Router.post("/customer/new", authentication, customerNew);
  */
 
 Router.post("/transaction/new", authentication, transactionNew);
+
+Router.get("/transaction/get-all", authentication, transactionGetAll);
 
 Router.get("/transaction/:transactionID", authentication, transactionGetDetail);
 

@@ -53,8 +53,9 @@ module.exports = {
         worksheet.cell(1, 2).string("Product Name").style(titleStyle);
         worksheet.cell(1, 3).string("UOM").style(titleStyle);
         worksheet.cell(1, 4).string("Department").style(titleStyle);
-        worksheet.cell(1, 4).string("Supplier Code").style(titleStyle);
-        worksheet.cell(1, 4).string("Unit Cost").style(titleStyle);
+        worksheet.cell(1, 5).string("Supplier Code").style(titleStyle);
+        worksheet.cell(1, 6).string("Unit Cost").style(titleStyle);
+        worksheet.cell(1, 7).string("Quantity").style(titleStyle);
         pipFileStream(res);
     },
 };

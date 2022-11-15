@@ -30,7 +30,7 @@ const authorization = {
     checkPayStatus: async (req, res, next) => {
         const transactionID = req.params.transactionID || null;
         const transactionQuery = await transactionModel.findOne({ transactionID });
-        if (!transactionID)
+        if (!transactionQuery)
             return res.status(404).json({
                 status: false,
                 statusCode: 404,

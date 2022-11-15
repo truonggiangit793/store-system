@@ -54,6 +54,15 @@ module.exports = {
             });
         }
     },
+    transactionGetAll: async (req, res, next) => {
+        const transactionQueryAll = await transactionModel.find({});
+        return res.status(200).json({
+            status: true,
+            statusCode: 200,
+            msg: { en: "Transaction list" },
+            data: transactionQueryAll,
+        });
+    },
     transactionGetDetail: async (req, res, next) => {
         // #swagger.tags = ['Transaction']
         try {
@@ -137,7 +146,7 @@ module.exports = {
     transactionOrder: async (req, res, next) => {
         // #swagger.tags = ['Transaction']
         try {
-            // const transactionID = parseInt(req.params.transactionID) || 0;
+            const transactionID = parseInt(req.params.transactionID) || 0;
             // const listProduct = req.body.listProduct || [];
             // const transactionQuery = await transactionModel.findOne({
             //     transactionID,
@@ -257,10 +266,18 @@ module.exports = {
                     });
                 }
             }
+            let disCount = transactionQuery.disCount;
+            if (transactionQuery.customerID) {
+                const customerQuery = await customerModel.findOne({ customerID: transactionQuery.customerID });
+                if (customerQuery) {
+                    disCount = customerQuery.point;
+                }
+            }
             await transactionModel.findOneAndUpdate(
                 { transactionID },
                 {
                     details: cart,
+                    disCount,
                     totalPrice: transactionQuery.totalPrice + productQuery.unitCost * productQtyToOrder,
                 }
             );
@@ -319,9 +336,7 @@ module.exports = {
                     },
                 });
 
-            const customerQuery = await customerModel.findOne({
-                customerID: transactionQuery.customerID,
-            });
+            const customerQuery = await customerModel.findOne({ customerID: transactionQuery.customerID });
             let totalPrice = parseInt(transactionQuery.totalPrice);
             let cash = req.body.cash ? parseInt(req.body.cash) : 0;
             let disCount,
