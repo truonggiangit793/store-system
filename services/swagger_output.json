@@ -1560,6 +1560,52 @@
         }
       }
     },
+    "/employee/salary/updateSalary": {
+      "post": {
+        "tags": [
+          "Employee"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "userCode": {
+                  "example": "any"
+                },
+                "newSalary": {
+                  "example": "any"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/report/transaction/get-all": {
       "get": {
         "tags": [

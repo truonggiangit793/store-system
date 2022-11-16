@@ -7,6 +7,62 @@ const phoneNumberValidator = require("validate-phone-number-node-js");
 const e = require("express");
 
 module.exports = {
+    employeeUpdateSalary : async (req, res, next) => {
+        // #swagger.tags = ['Employee']
+        
+        try {
+            const userCode = req.body.userCode ? req.body.userCode.toUpperCase() : null;
+            const newSalary = parseInt(req.body.newSalary) ? parseInt(req.body.newSalary) : null;
+
+            if (!userCode){
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: { en: "userCode is required.", vn: "Mã số nhân viên là bắt buộc." },
+                });
+            }
+            if (!newSalary){
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: { en: "New Salary is required.", vn: "Mức lương mới của nhân viên là bắt buộc." },
+                });
+            }
+            const employeeQuery = await employeeModel.findOne({ userCode });
+            const accountQuery = await accountModel.findOne({ userCode });
+            if(!employeeQuery){
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: { en: "Employee does not exist.", vn: "Nhân viên không tồn tại." },
+                });
+            }
+            await employeeModel.findOneAndUpdate(
+                { userCode },
+                {
+                    preSalary : newSalary,
+                }
+            );
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `Employee's salary has been updated successfully!`,
+                    vn: `Lương của nhân viên ${accountQuery.fullName} đã được cập nhật thông tin thành công.`,
+                },
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                statusCode: 500,
+                msg: { en: "Interal Server Error" },
+                error: error.message,
+            });
+        }
+
+
+
+    },
     employeeSalaryVisualize: async (req, res, next) => {
         // #swagger.tags = ['Employee']
         try {
