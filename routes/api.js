@@ -48,7 +48,7 @@ const { customerNew, customerGetAll, customerGetDetail } = require("./modules/cu
 
 const { attendanceCheckIn, attendanceGetAll, attendanceCheckOut, attendanceReport } = require("./modules/attendance");
 
-const { employeeSalaryVisualize } = require("./modules/employee");
+const { employeeSalaryVisualize, employeeUpdateSalary } = require("./modules/employee");
 
 const { reportGetAllTransaction } = require("./modules/report");
 
@@ -165,6 +165,7 @@ Router.get("/attendance/report", authentication, attendanceReport);
  */
 
 Router.get("/employee/salary/visualize", authentication, authorization.admin, employeeSalaryVisualize);
+Router.post("/employee/salary/updateSalary", authentication, authorization.admin, employeeUpdateSalary);
 
 /**
  * Report ================================================================
