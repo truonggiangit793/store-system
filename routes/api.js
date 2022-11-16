@@ -15,6 +15,7 @@ const {
     accountGetAll,
     accountUpdateMe,
     accountChangePassword,
+    accountGetDetail,
 } = require("./modules/accounts");
 
 const {
@@ -30,8 +31,6 @@ const {
     productUpdatePrice,
 } = require("./modules/products");
 
-const { supplierImport, supplierRegister, supplierDelete, supplierGetAll, supplierGetDetail } = require("./modules/suppliers");
-
 const {
     transactionNew,
     transactionOrder,
@@ -43,7 +42,9 @@ const {
     transactionGetAll,
 } = require("./modules/transaction");
 
-const { customerNew } = require("./modules/customer");
+const { supplierImport, supplierRegister, supplierDelete, supplierGetAll, supplierGetDetail } = require("./modules/suppliers");
+
+const { customerNew, customerGetAll, customerGetDetail } = require("./modules/customer");
 
 const { attendanceCheckIn, attendanceGetAll, attendanceCheckOut, attendanceReport } = require("./modules/attendance");
 
@@ -62,6 +63,8 @@ Router.post("/account/import", authentication, authorization.admin, multerServic
 Router.post("/account/register", authentication, authorization.admin, accountRegister);
 
 Router.delete("/account/disable/:userCode", authentication, authorization.admin, accountDisable);
+
+Router.get("/account/:userCode/detail", authentication, accountGetDetail);
 
 Router.get("/account/me", authentication, accountGetProfile);
 
@@ -121,6 +124,10 @@ Router.put("/product/update-price", authentication, authorization.admin, product
 
 Router.post("/customer/new", authentication, customerNew);
 
+Router.get("/customer/get-all", authentication, customerGetAll);
+
+Router.get("/customer/detail", authentication, customerGetDetail);
+
 /**
  * Transaction ================================================================
  */
@@ -149,9 +156,9 @@ Router.post("/attendance/checkin", attendanceCheckIn);
 
 Router.post("/attendance/checkout", attendanceCheckOut);
 
-Router.get("/attendance/get-all", authentication, authorization.admin, attendanceGetAll);
+Router.get("/attendance/get-all", authentication, attendanceGetAll);
 
-Router.get("/attendance/report", authentication, authorization.admin, attendanceReport);
+Router.get("/attendance/report", authentication, attendanceReport);
 
 /**
  * Employee ================================================================

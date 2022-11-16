@@ -109,17 +109,9 @@ module.exports = {
                 if (index > 0) {
                     console.log(element[5].toUpperCase());
                     if (element[5].toUpperCase().includes("MANAGER")) {
-                        await employeeModel.findOneAndUpdate(
-                            { userCode: element[0].toUpperCase() },
-                            { preSalary: 40000 },
-                            { upsert: true, new: true, setDefaultsOnInsert: true }
-                        );
+                        await employeeModel.findOneAndUpdate({ userCode: element[0].toUpperCase() }, { preSalary: 40000 }, { upsert: true, new: true, setDefaultsOnInsert: true });
                     } else {
-                        await employeeModel.findOneAndUpdate(
-                            { userCode: element[0].toUpperCase() },
-                            { preSalary: 25000 },
-                            { upsert: true, new: true, setDefaultsOnInsert: true }
-                        );
+                        await employeeModel.findOneAndUpdate({ userCode: element[0].toUpperCase() }, { preSalary: 25000 }, { upsert: true, new: true, setDefaultsOnInsert: true });
                     }
                     await accountModel.findOneAndUpdate(
                         { userCode: element[0].toUpperCase() },
@@ -361,6 +353,44 @@ module.exports = {
             });
         }
     },
+    accountGetDetail: async (req, res, next) => {
+        try {
+            const userCode = req.params.userCode ? req.params.userCode.toUpperCase() : null;
+            const accountQuery = await accountModel.findOne({ userCode });
+            if (!accountQuery)
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: `User account "${userCode}" not found or has been remove from the system.`,
+                        vn: `Tài khoản "${userCode}" không tồn tại trong hệ thống, vui lòng thử lại.`,
+                    },
+                });
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: "Get personal information successfully!",
+                    vn: "Tải thông tin cá nhân thành công!",
+                },
+                data: {
+                    email: accountQuery.email,
+                    fullName: accountQuery.fullName,
+                    userCode: accountQuery.userCode,
+                    phoneNumber: accountQuery.phoneNumber,
+                    lastLogin: accountQuery.lastLogin,
+                    role: accountQuery.role,
+                },
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                statusCode: 500,
+                msg: { en: "Interal Server Error" },
+                error: error.message,
+            });
+        }
+    },
     accountUpdateMe: async (req, res, next) => {
         // #swagger.tags = ['Accounts']
         // #swagger.description = 'Users of the system can update their information by calling this api .'
@@ -487,7 +517,7 @@ module.exports = {
         // #swagger.tags = ['Accounts']
         // #swagger.description = 'Admin can list of all accounts by using this endpoint.'
         try {
-            const accountList = await accountModel.find({});
+            const accountList = await accountModel.find({}).sort({ updatedAt: -1 });
             if (accountList.length > 0) {
                 return res.status(200).json({
                     status: true,

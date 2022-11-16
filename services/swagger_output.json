@@ -183,6 +183,40 @@
         }
       }
     },
+    "/account/{userCode}/detail": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "userCode",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/account/me": {
       "get": {
         "tags": [
@@ -1091,21 +1125,61 @@
             "name": "token",
             "in": "query",
             "type": "string"
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/customer/get-all": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
           },
           {
-            "name": "body",
-            "in": "body",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "customerID": {
-                  "example": "any"
-                },
-                "fullName": {
-                  "example": "any"
-                }
-              }
-            }
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/customer/detail": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "customerID",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -1123,6 +1197,9 @@
     },
     "/transaction/new": {
       "post": {
+        "tags": [
+          "Transaction"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1137,6 +1214,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -1162,6 +1242,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -1173,6 +1256,9 @@
     },
     "/transaction/{transactionID}": {
       "get": {
+        "tags": [
+          "Transaction"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1193,8 +1279,14 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1204,6 +1296,9 @@
     },
     "/transaction/{transactionID}/order": {
       "post": {
+        "tags": [
+          "Transaction"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1221,9 +1316,27 @@
             "name": "token",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "barcode": {
+                  "example": "any"
+                },
+                "qty": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -1238,6 +1351,9 @@
     },
     "/transaction/{transactionID}/add-customer": {
       "post": {
+        "tags": [
+          "Transaction"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1255,9 +1371,24 @@
             "name": "token",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "customerID": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -1272,6 +1403,9 @@
     },
     "/transaction/{transactionID}/toggle-point": {
       "post": {
+        "tags": [
+          "Transaction"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1292,6 +1426,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -1306,6 +1443,9 @@
     },
     "/transaction/{transactionID}/delete": {
       "delete": {
+        "tags": [
+          "Transaction"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1326,6 +1466,9 @@
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },
@@ -1340,6 +1483,9 @@
     },
     "/transaction/{transactionID}/pay": {
       "post": {
+        "tags": [
+          "Transaction"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1357,9 +1503,24 @@
             "name": "token",
             "in": "query",
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "cash": {
+                  "example": "any"
+                }
+              }
+            }
           }
         ],
         "responses": {
+          "200": {
+            "description": "OK"
+          },
           "401": {
             "description": "Unauthorized"
           },

@@ -138,14 +138,11 @@ module.exports = {
         // #swagger.description = 'Admin can list of all suppliers by using this endpoint.'
         try {
             const perPageMaxSize = 20;
-            let perPage = parseInt(req.query.perPage)
-                ? parseInt(req.query.perPage) >= perPageMaxSize
-                    ? perPageMaxSize
-                    : parseInt(req.query.perPage)
-                : perPageMaxSize;
+            let perPage = parseInt(req.query.perPage) ? (parseInt(req.query.perPage) >= perPageMaxSize ? perPageMaxSize : parseInt(req.query.perPage)) : perPageMaxSize;
             let page = parseInt(req.query.page) || 1;
             supplierModel
                 .find({})
+                .sort({ updatedAt: -1 })
                 .skip(perPage * page - perPage)
                 .limit(perPage)
                 .exec((err, supplierList) => {
