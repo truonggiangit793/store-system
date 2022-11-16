@@ -1,6 +1,5 @@
 const attendanceModel = require("../../models/attendance");
 const accountModel = require("../../models/account");
-const { check } = require("prettier");
 
 module.exports = {
     attendanceCheckIn: async (req, res, next) => {
@@ -18,15 +17,25 @@ module.exports = {
                         vn: "Tài khoản đăng nhập là bắt buộc.",
                     },
                 });
+            if (accountQuery && accountQuery.role == "ADMIN") {
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "ADMIN cannot complete this request.",
+                        vn: "Tài khoản ADMIN không thể thực hiện yêu cầu này.",
+                    },
+                });
+            }
             if (accountQuery) {
                 const noCheckOut = await attendanceModel.findOne({ userCode, checkOut: null });
                 if (noCheckOut)
                     return res.status(200).json({
-                        status: true,
+                        status: false,
                         statusCode: 200,
                         msg: {
-                            en: `"${accountQuery.fullName}" have a shift that not checked-out!`,
-                            vn: `"${accountQuery.fullName}" có một ca chưa time-out.`,
+                            en: `"${accountQuery.fullName}" need to fish a previous shift!`,
+                            vn: `"${accountQuery.fullName}" cần kết thúc một ca làm trước đó.`,
                         },
                     });
                 const employee = new attendanceModel({ userCode, checkIn });
@@ -80,6 +89,16 @@ module.exports = {
                         vn: "Tài khoản không tồn tại.",
                     },
                 });
+            if (accountQuery && accountQuery.role == "ADMIN") {
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "ADMIN cannot complete this request.",
+                        vn: "Tài khoản ADMIN không thể thực hiện yêu cầu này.",
+                    },
+                });
+            }
             if (!attendanceQuery || attendanceQuery.checkIn.getDay() != today.getDay())
                 return res.status(200).json({
                     status: false,
@@ -89,15 +108,11 @@ module.exports = {
                         vn: `${accountQuery.fullName} không có ca làm việc nào hôm nay.`,
                     },
                 });
-            let totalWorkTime =
-                today.getHours() * 60 + today.getMinutes() - (attendanceQuery.checkIn.getHours() * 60 + attendanceQuery.checkIn.getMinutes());
+            let totalWorkTime = today.getHours() * 60 + today.getMinutes() - (attendanceQuery.checkIn.getHours() * 60 + attendanceQuery.checkIn.getMinutes());
             const hour = Math.floor(totalWorkTime / 60);
             const minute = totalWorkTime % 60;
             totalWorkTime = minute > 50 ? hour + 1 : hour;
-            await attendanceModel.findOneAndUpdate(
-                { userCode: attendanceQuery.userCode, checkIn: attendanceQuery.checkIn },
-                { checkOut: today, totalWorkTime }
-            );
+            await attendanceModel.findOneAndUpdate({ userCode: attendanceQuery.userCode, checkIn: attendanceQuery.checkIn }, { checkOut: today, totalWorkTime });
             return res.status(200).json({
                 status: true,
                 statusCode: 200,
@@ -285,6 +300,8 @@ module.exports = {
                 finalData.push({
                     dateString,
                     userCode: ele.userCode,
+                    timeIn: ele.checkIn,
+                    timeOut: ele.checkOut,
                     totalWorkTime: ele.totalWorkTime,
                 });
             }

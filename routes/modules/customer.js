@@ -37,12 +37,48 @@ module.exports = {
         const newCustomer = new customerModel({ customerID, fullName });
         await newCustomer.save();
         return res.status(200).json({
-            status: false,
+            status: true,
             statusCode: 200,
             msg: {
                 en: `Create an account for customer "${fullName}" successfully!`,
                 vn: `Đã tạo tài khoản khách hàng thành công cho "${fullName}".`,
             },
         });
+    },
+    customerGetAll: async (req, res, next) => {
+        const customerQueryAll = await customerModel.find({});
+        return res.status(200).json({
+            status: true,
+            statusCode: 200,
+            msg: {
+                en: "List of all customer.",
+                vn: "Danh sách tất cả khách hàng",
+            },
+            data: customerQueryAll,
+        });
+    },
+    customerGetDetail: async (req, res, next) => {
+        const customerID = req.query.customerID ? req.query.customerID.toUpperCase() : null;
+        const customerQuery = await customerModel.findOne({ customerID }).sort({ updatedAt: -1 });
+        if (customerQuery) {
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `Detail of customer ${customerQuery.fullName}.`,
+                    vn: `Thông tin chi tiết của khách hàng ${customerQuery.fullName}.`,
+                },
+                data: customerQuery,
+            });
+        } else {
+            return res.status(200).json({
+                status: false,
+                statusCode: 200,
+                msg: {
+                    en: `Customer ${customerID} not found.`,
+                    vn: `Khách hàng ${customerID} không tồn tại.`,
+                },
+            });
+        }
     },
 };
