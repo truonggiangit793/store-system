@@ -22,7 +22,7 @@ const accountSchema = new mongoose.Schema(
         },
         lastLogin: {
             type: Date,
-            default: new Date(),
+            default: null,
         },
         password: {
             type: String,

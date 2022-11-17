@@ -1,4 +1,8 @@
-const xlsxFile = require("read-excel-file/node");
+const fs = require("fs");
+const path = require("path");
+const mime = require("mime");
+const excel = require("excel4node");
+const workbook = new excel.Workbook();
 const jwt = require("jsonwebtoken");
 const productModel = require("../../models/product");
 const supplierModel = require("../../models/supplier");
@@ -55,6 +59,7 @@ module.exports = {
         }
     },
     transactionGetAll: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
         const transactionQueryAll = await transactionModel.find({}).sort({ updatedAt: -1 });
         return res.status(200).json({
             status: true,
@@ -182,6 +187,19 @@ module.exports = {
                     },
                 });
             }
+            if (cart.length > 0) {
+                const productFound = cart.find((product) => product.barcode == barcode);
+                if (productFound && productFound.qty >= productQuery.quantity) {
+                    return res.status(200).json({
+                        status: false,
+                        statusCode: 200,
+                        msg: {
+                            en: `Product barcode "${barcode}" does not have a quantity for this transaction!`,
+                            vn: `Sản phẩm có mã vạch "${barcode}" không đủ số lượng để cung cấp cho giao dịch này.`,
+                        },
+                    });
+                }
+            }
             if (cart.length == 0) {
                 cart.push({
                     barcode: productQuery.barcode,
@@ -204,19 +222,19 @@ module.exports = {
                     });
                 }
             }
-            let disCount = transactionQuery.disCount;
-            if (transactionQuery.customerID) {
-                const customerQuery = await customerModel.findOne({ customerID: transactionQuery.customerID });
-                if (customerQuery) {
-                    disCount = customerQuery.point;
-                }
-            }
+            // let disCount = transactionQuery.disCount;
+            // if (transactionQuery.customerID) {
+            //     const customerQuery = await customerModel.findOne({ customerID: transactionQuery.customerID });
+            //     if (customerQuery) {
+            //         disCount = customerQuery.point;
+            //     }
+            // }
             await transactionModel.findOneAndUpdate(
                 { transactionID },
                 {
                     details: cart,
-                    disCount,
-                    totalPrice: transactionQuery.totalPrice + productQuery.unitCost * productQtyToOrder,
+                    // disCount,
+                    subTotal: transactionQuery.subTotal + productQuery.unitCost * productQtyToOrder,
                 }
             );
             return res.status(200).json({
@@ -264,7 +282,7 @@ module.exports = {
                     },
                 });
             }
-            if (!transactionQuery.totalPrice || transactionQuery.totalPrice <= 0)
+            if (!transactionQuery.subTotal || transactionQuery.subTotal <= 0)
                 return res.status(200).json({
                     status: false,
                     statusCode: 200,
@@ -274,7 +292,7 @@ module.exports = {
                     },
                 });
             const customerQuery = await customerModel.findOne({ customerID: transactionQuery.customerID });
-            let totalPrice = parseInt(transactionQuery.totalPrice);
+            let totalPrice = parseInt(transactionQuery.subTotal);
             let cash = req.body.cash ? parseInt(req.body.cash) : 0;
             let disCount,
                 changeDue,
@@ -285,11 +303,12 @@ module.exports = {
                     disCount = totalPrice;
                     totalPrice = 0;
                     changeDue = cash;
-                    pointToUpdate = customerPoint - transactionQuery.totalPrice;
+                    pointToUpdate = customerPoint - totalPrice;
                 } else {
                     disCount = customerPoint;
                     totalPrice = totalPrice - disCount;
                     pointToUpdate = 0;
+                    cash = req.body.cash ? parseInt(req.body.cash) : totalPrice;
                     if (cash < totalPrice)
                         return res.status(200).json({
                             status: false,
@@ -303,7 +322,7 @@ module.exports = {
                 }
                 await customerModel.findOneAndUpdate({ customerID: customerQuery.customerID }, { point: pointToUpdate });
             } else {
-                cash = req.body.cash ? parseInt(req.body.cash) : transactionQuery.totalPrice;
+                cash = req.body.cash ? parseInt(req.body.cash) : transactionQuery.subTotal;
                 if (cash < totalPrice)
                     return res.status(200).json({
                         status: false,
@@ -317,7 +336,7 @@ module.exports = {
                 if (customerQuery) await customerModel.findOneAndUpdate({ customerID: customerQuery.customerID }, { point: pointToUpdate });
             }
             changeDue = Math.floor(cash - totalPrice);
-            await transactionModel.findOneAndUpdate({ transactionID }, { payStatus: true, cash, changeDue, disCount });
+            await transactionModel.findOneAndUpdate({ transactionID }, { payStatus: true, cash, changeDue, disCount, totalPrice });
             transactionQuery.details.forEach(async (item) => {
                 product = await productModel.findOne({ barcode: item.barcode });
                 await productModel.findOneAndUpdate({ barcode: item.barcode }, { quantity: product.quantity - item.qty });
@@ -406,7 +425,7 @@ module.exports = {
                 },
             });
         }
-        await transactionModel.findOneAndUpdate({ transactionID }, { usePoint: !transactionQuery.usePoint });
+        await transactionModel.findOneAndUpdate({ transactionID }, { usePoint: !transactionQuery.usePoint, disCount: transactionQuery.usePoint ? transactionQuery.disCount : 0 });
         return res.status(200).json({
             status: true,
             statusCode: 200,
@@ -415,5 +434,239 @@ module.exports = {
                 vn: "Đã thay đổi trạng thái sử dụng điểm của khách hàng thành công.",
             },
         });
+    },
+    transactionVisualize: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
+        try {
+            const dateFrom = req.query.dateFrom || "";
+            const dateTo = req.query.dateTo || "";
+            const validDateFrom = dateFrom.includes("/")
+                ? dateFrom.split("/")[2].length == 4
+                    ? parseInt(dateFrom.split("/")[0]) > 0 && parseInt(dateFrom.split("/")[0]) <= 31
+                        ? dateFrom.split("/")[1] > 0 && dateFrom.split("/")[1] <= 12
+                            ? true
+                            : false
+                        : false
+                    : false
+                : false;
+            const validDateTo = dateTo.includes("/")
+                ? dateTo.split("/")[2].length == 4
+                    ? parseInt(dateTo.split("/")[0]) > 0 && parseInt(dateTo.split("/")[0]) <= 31
+                        ? dateTo.split("/")[1] > 0 && dateTo.split("/")[1] <= 12
+                            ? true
+                            : false
+                        : false
+                    : false
+                : false;
+            if (!dateFrom || !validDateFrom)
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "Please confirm what date from, and must be a valid date: DD/MM/YYYY",
+                        vn: "Vui lòng xác nhận thời điểm bắt đầu và phải là dữ liệu hợp lệ: DD/MM/YYYY",
+                    },
+                });
+            if (!dateTo || !validDateTo)
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "Please confirm the end date, and must be a valid date: DD/MM/YYYY",
+                        vn: "Vui lòng xác nhận thời điểm kết thúc và phải là dữ liệu hợp lệ: DD/MM/YYYY",
+                    },
+                });
+            const timeFrom = new Date(parseInt(dateFrom.split("/")[2]), parseInt(dateFrom.split("/")[1]) - 1, parseInt(dateFrom.split("/")[0]), 11, 0, 0);
+            const timeTo = new Date(parseInt(dateTo.split("/")[2]), parseInt(dateTo.split("/")[1]) - 1, parseInt(dateTo.split("/")[0]), 11, 0, 0);
+            if (timeTo < timeFrom)
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "The start date must be lager than the end date.",
+                        vn: "Thời điểm kết thúc phải lớn hơn thời điểm bắt đầu.",
+                    },
+                });
+            // Code here=================================================================
+            let finalData = [];
+            let totalSale = 0;
+            const transactionQueryAll = await transactionModel.find({});
+            transactionQueryAll.forEach((transaction) => {
+                let date = new Date(transaction.createdAt.toISOString());
+                let dateString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                if (date >= timeFrom && date <= timeTo) {
+                    totalSale += transaction.totalPrice;
+                    finalData.push({
+                        dateString,
+                        id: transaction.transactionID,
+                        cash: transaction.cash,
+                        totalProduct: transaction.details.length,
+                        totalPrice: transaction.totalPrice,
+                    });
+                }
+            });
+            // Code here=================================================================
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                timeData: {
+                    startDate: timeFrom,
+                    endDate: timeTo,
+                },
+                result: {
+                    totalSale,
+                    data: finalData,
+                },
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                statusCode: 500,
+                msg: { en: "Interal Server Error" },
+                error: error.message,
+            });
+        }
+    },
+    transactionVisualizeExport: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
+        try {
+            const dateFrom = req.query.dateFrom || "";
+            const dateTo = req.query.dateTo || "";
+            const validDateFrom = dateFrom.includes("/")
+                ? dateFrom.split("/")[2].length == 4
+                    ? parseInt(dateFrom.split("/")[0]) > 0 && parseInt(dateFrom.split("/")[0]) <= 31
+                        ? dateFrom.split("/")[1] > 0 && dateFrom.split("/")[1] <= 12
+                            ? true
+                            : false
+                        : false
+                    : false
+                : false;
+            const validDateTo = dateTo.includes("/")
+                ? dateTo.split("/")[2].length == 4
+                    ? parseInt(dateTo.split("/")[0]) > 0 && parseInt(dateTo.split("/")[0]) <= 31
+                        ? dateTo.split("/")[1] > 0 && dateTo.split("/")[1] <= 12
+                            ? true
+                            : false
+                        : false
+                    : false
+                : false;
+            if (!dateFrom || !validDateFrom)
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "Please confirm what date from, and must be a valid date: DD/MM/YYYY",
+                        vn: "Vui lòng xác nhận thời điểm bắt đầu và phải là dữ liệu hợp lệ: DD/MM/YYYY",
+                    },
+                });
+            if (!dateTo || !validDateTo)
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "Please confirm the end date, and must be a valid date: DD/MM/YYYY",
+                        vn: "Vui lòng xác nhận thời điểm kết thúc và phải là dữ liệu hợp lệ: DD/MM/YYYY",
+                    },
+                });
+            const timeFrom = new Date(parseInt(dateFrom.split("/")[2]), parseInt(dateFrom.split("/")[1]) - 1, parseInt(dateFrom.split("/")[0]), 11, 0, 0);
+            const timeTo = new Date(parseInt(dateTo.split("/")[2]), parseInt(dateTo.split("/")[1]) - 1, parseInt(dateTo.split("/")[0]), 11, 0, 0);
+            if (timeTo < timeFrom)
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: {
+                        en: "The start date must be lager than the end date.",
+                        vn: "Thời điểm kết thúc phải lớn hơn thời điểm bắt đầu.",
+                    },
+                });
+            // Code here=================================================================
+            let finalData = [];
+            let totalSale = 0;
+            const transactionQueryAll = await transactionModel.find({});
+            transactionQueryAll.forEach((transaction) => {
+                let date = new Date(transaction.createdAt.toISOString());
+                let dateString = `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
+                if (date >= timeFrom && date <= timeTo) {
+                    totalSale += transaction.totalPrice;
+                    finalData.push({
+                        dateString,
+                        id: transaction.transactionID,
+                        cash: transaction.cash,
+                        totalProduct: transaction.details.length,
+                        totalPrice: transaction.totalPrice,
+                    });
+                }
+            });
+            // Code here=================================================================
+            const dir = path.resolve(__dirname, "../", "../", "tmp");
+            const exportedFile = dir + "/tmp.xlsx";
+            !fs.existsSync(dir) ? fs.mkdirSync(dir) : null;
+            const worksheet = workbook.addWorksheet("Master");
+            const titleStyle = workbook.createStyle({ font: { color: "#000000", size: 12, bold: true } });
+            const normalStyle = workbook.createStyle({ font: { color: "#000000", size: 12 } });
+            worksheet.cell(1, 1).string("Date").style(titleStyle);
+            worksheet.cell(1, 2).string("InvoiceID").style(titleStyle);
+            worksheet.cell(1, 3).string("Cash").style(titleStyle);
+            worksheet.cell(1, 4).string("Product amount").style(titleStyle);
+            worksheet.cell(1, 5).string("Price").style(titleStyle);
+            worksheet.column(1).setWidth(20);
+            worksheet.column(2).setWidth(20);
+            worksheet.column(3).setWidth(50);
+            worksheet.column(4).setWidth(20);
+            worksheet.column(5).setWidth(30);
+            if (finalData && finalData.length > 0) {
+                finalData.forEach((transaction, index) => {
+                    worksheet
+                        .cell(index + 2, 1)
+                        .string(transaction.dateString)
+                        .style(normalStyle);
+                    worksheet
+                        .cell(index + 2, 2)
+                        .string(transaction.id)
+                        .style(normalStyle);
+                    worksheet
+                        .cell(index + 2, 3)
+                        .string(transaction.cash.toString())
+                        .style(normalStyle);
+                    worksheet
+                        .cell(index + 2, 4)
+                        .string(transaction.totalProduct.toString())
+                        .style(normalStyle);
+                    worksheet
+                        .cell(index + 2, 5)
+                        .string(transaction.totalPrice.toString())
+                        .style(normalStyle);
+                });
+                worksheet
+                    .cell(finalData.length + 2, 1)
+                    .string("Total sale:")
+                    .style(titleStyle);
+                worksheet
+                    .cell(finalData.length + 2, 5)
+                    .string(totalSale.toString())
+                    .style(titleStyle);
+            } else {
+                worksheet.cell(2, 1).string("No data").style(normalStyle);
+            }
+            workbook.write(exportedFile, (err, stats) => {
+                if (!err) {
+                    const filename = path.basename(exportedFile);
+                    const mimetype = mime.lookup(exportedFile);
+                    res.setHeader("Content-disposition", "attachment; filename=" + filename);
+                    res.setHeader("Content-type", mimetype);
+                    const filestream = fs.createReadStream(exportedFile);
+                    filestream.pipe(res);
+                } else {
+                    res.end("An error occured, please refesh this page!");
+                }
+            });
+        } catch (error) {
+            return res.status(500).json({
+                status: false,
+                statusCode: 500,
+                msg: { en: "Interal Server Error" },
+                error: error.message,
+            });
+        }
     },
 };

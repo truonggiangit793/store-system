@@ -120,7 +120,7 @@ module.exports = {
                             fullName: element[1].toUpperCase(),
                             email: element[2],
                             phoneNumber: element[3],
-                            password: bcrypt.hashSync(element[4], bcrypt.genSaltSync(10)),
+                            password: bcrypt.hashSync(element[4].toUpperCase(), bcrypt.genSaltSync(10)),
                             role: element[5] ? (element[5].toUpperCase() == roleConfig.admin ? roleConfig.cashier : element[5].toUpperCase()) : null,
                         },
                         { upsert: true, new: true, setDefaultsOnInsert: true }
@@ -228,7 +228,7 @@ module.exports = {
                     fullName,
                     email,
                     phoneNumber,
-                    password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
+                    password: bcrypt.hashSync(password.toUpperCase(), bcrypt.genSaltSync(10)),
                     role,
                 });
                 if (role.includes("MANAGER")) {
@@ -354,6 +354,7 @@ module.exports = {
         }
     },
     accountGetDetail: async (req, res, next) => {
+        // #swagger.tags = ['Accounts']
         try {
             const userCode = req.params.userCode ? req.params.userCode.toUpperCase() : null;
             const accountQuery = await accountModel.findOne({ userCode });
@@ -391,30 +392,38 @@ module.exports = {
             });
         }
     },
-    accountUpdateMe: async (req, res, next) => {
+    accountUpdate: async (req, res, next) => {
         // #swagger.tags = ['Accounts']
         // #swagger.description = 'Users of the system can update their information by calling this api .'
         try {
-            const token = req.query.token || req.headers["x-access-token"];
-            jwt.verify(token, process.env.SECRET_KEY, async (error, payload) => {
-                const accountQuery = await accountModel.findOne({ userCode: payload.data.userCode });
-                await accountModel.findOneAndUpdate(
-                    { userCode: payload.data.userCode },
-                    {
-                        email: req.body.email || accountQuery.email,
-                        fullName: req.body.fullName ? req.body.fullName.toUpperCase() : null || accountQuery.fullName,
-                        phoneNumber: req.body.phoneNumber || accountQuery.phoneNumber,
-                    },
-                    { upsert: true, new: true, setDefaultsOnInsert: true }
-                );
+            const userCode = req.params.userCode.toUpperCase() || null;
+            const accountQuery = await accountModel.findOne({ userCode });
+            if (!accountQuery)
                 return res.status(200).json({
-                    status: true,
+                    status: false,
                     statusCode: 200,
                     msg: {
-                        en: `Account name "${accountQuery.fullName}" has been updated successfully!`,
-                        vn: `Tài khoản "${accountQuery.fullName}" đã được cập nhật thông tin thành công.`,
+                        en: `User account "${userCode}" not found or has been remove from the system.`,
+                        vn: `Tài khoản "${userCode}" không tồn tại trong hệ thống, vui lòng thử lại.`,
                     },
                 });
+            await accountModel.findOneAndUpdate(
+                { userCode },
+                {
+                    email: req.body.email || accountQuery.email,
+                    fullName: req.body.fullName ? req.body.fullName.toUpperCase() : null || accountQuery.fullName,
+                    phoneNumber: req.body.phoneNumber || accountQuery.phoneNumber,
+                    role: req.body.role || accountQuery.role,
+                },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
+            return res.status(200).json({
+                status: true,
+                statusCode: 200,
+                msg: {
+                    en: `Account name "${accountQuery.fullName}" has been updated successfully!`,
+                    vn: `Tài khoản "${accountQuery.fullName}" đã được cập nhật thông tin thành công.`,
+                },
             });
         } catch (error) {
             return res.status(500).json({

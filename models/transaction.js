@@ -32,6 +32,10 @@ const transactionSchema = new mongoose.Schema(
             type: Boolean,
             default: false,
         },
+        subTotal: {
+            type: Number,
+            default: 0,
+        },
         totalPrice: {
             type: Number,
             default: 0,

@@ -13,7 +13,7 @@ const {
     accountGetProfile,
     accountDisable,
     accountGetAll,
-    accountUpdateMe,
+    accountUpdate,
     accountChangePassword,
     accountGetDetail,
 } = require("./modules/accounts");
@@ -40,6 +40,8 @@ const {
     transactionAddCustomer,
     transactionTogglePoint,
     transactionGetAll,
+    transactionVisualize,
+    transactionVisualizeExport,
 } = require("./modules/transaction");
 
 const { supplierImport, supplierRegister, supplierDelete, supplierGetAll, supplierGetDetail } = require("./modules/suppliers");
@@ -48,9 +50,7 @@ const { customerNew, customerGetAll, customerGetDetail } = require("./modules/cu
 
 const { attendanceCheckIn, attendanceGetAll, attendanceCheckOut, attendanceReport } = require("./modules/attendance");
 
-const { employeeSalaryVisualize, employeeUpdateSalary } = require("./modules/employee");
-
-const { reportGetAllTransaction } = require("./modules/report");
+const { employeeSalaryVisualize, employeeSalaryVisualizeExport, employeeUpdateSalary, employeeGetAll, employeeGetDetail } = require("./modules/employee");
 
 /**
  * Account ================================================================
@@ -68,7 +68,7 @@ Router.get("/account/:userCode/detail", authentication, accountGetDetail);
 
 Router.get("/account/me", authentication, accountGetProfile);
 
-Router.put("/account/update-me", authentication, accountUpdateMe);
+Router.put("/account/:userCode/update", authentication, accountUpdate);
 
 Router.put("/account/change-password", authentication, accountChangePassword);
 
@@ -126,7 +126,7 @@ Router.post("/customer/new", authentication, customerNew);
 
 Router.get("/customer/get-all", authentication, customerGetAll);
 
-Router.get("/customer/detail", authentication, customerGetDetail);
+Router.get("/customer/:customerID/detail", authentication, customerGetDetail);
 
 /**
  * Transaction ================================================================
@@ -135,6 +135,10 @@ Router.get("/customer/detail", authentication, customerGetDetail);
 Router.post("/transaction/new", authentication, transactionNew);
 
 Router.get("/transaction/get-all", authentication, transactionGetAll);
+
+Router.get("/transaction/visualize", authentication, authorization.admin, transactionVisualize);
+
+Router.get("/transaction/visualize/export", authentication, authorization.admin, transactionVisualizeExport);
 
 Router.get("/transaction/:transactionID", authentication, transactionGetDetail);
 
@@ -165,13 +169,18 @@ Router.get("/attendance/report", authentication, attendanceReport);
  */
 
 Router.get("/employee/salary/visualize", authentication, authorization.admin, employeeSalaryVisualize);
+
+Router.get("/employee/salary/visualize/export", authentication, authorization.admin, employeeSalaryVisualizeExport);
+
+Router.get("/employee/get-all", authentication, authorization.admin, employeeGetAll);
+
+Router.get("/employee/:userCode/detail", authentication, authorization.admin, employeeGetDetail);
+
 Router.post("/employee/salary/updateSalary", authentication, authorization.admin, employeeUpdateSalary);
 
 /**
  * Report ================================================================
  */
-
-Router.get("/report/transaction/get-all", authentication, authorization.admin, reportGetAllTransaction);
 
 Router.get("/test", test, end);
 

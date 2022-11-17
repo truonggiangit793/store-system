@@ -185,6 +185,9 @@
     },
     "/account/{userCode}/detail": {
       "get": {
+        "tags": [
+          "Accounts"
+        ],
         "description": "",
         "parameters": [
           {
@@ -248,13 +251,19 @@
         }
       }
     },
-    "/account/update-me": {
+    "/account/{userCode}/update": {
       "put": {
         "tags": [
           "Accounts"
         ],
         "description": "Users of the system can update their information by calling this api .",
         "parameters": [
+          {
+            "name": "userCode",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "x-access-token",
             "in": "header",
@@ -278,6 +287,9 @@
                   "example": "any"
                 },
                 "phoneNumber": {
+                  "example": "any"
+                },
+                "role": {
                   "example": "any"
                 }
               }
@@ -1162,10 +1174,19 @@
         }
       }
     },
-    "/customer/detail": {
+    "/customer/{customerID}/detail": {
       "get": {
+        "tags": [
+          "Customers"
+        ],
         "description": "",
         "parameters": [
+          {
+            "name": "customerID",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "x-access-token",
             "in": "header",
@@ -1173,11 +1194,6 @@
           },
           {
             "name": "token",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "customerID",
             "in": "query",
             "type": "string"
           }
@@ -1228,6 +1244,9 @@
     },
     "/transaction/get-all": {
       "get": {
+        "tags": [
+          "Transaction"
+        ],
         "description": "",
         "parameters": [
           {
@@ -1237,6 +1256,88 @@
           },
           {
             "name": "token",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/transaction/visualize": {
+      "get": {
+        "tags": [
+          "Transaction"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/transaction/visualize/export": {
+      "get": {
+        "tags": [
+          "Transaction"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "dateTo",
             "in": "query",
             "type": "string"
           }
@@ -1721,6 +1822,115 @@
         }
       }
     },
+    "/employee/salary/visualize/export": {
+      "get": {
+        "tags": [
+          "Employee"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "dateFrom",
+            "in": "query",
+            "type": "string"
+          },
+          {
+            "name": "dateTo",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/employee/get-all": {
+      "get": {
+        "tags": [
+          "Employee"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/employee/{userCode}/detail": {
+      "get": {
+        "tags": [
+          "Employee"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "userCode",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "x-access-token",
+            "in": "header",
+            "type": "string"
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/employee/salary/updateSalary": {
       "post": {
         "tags": [
@@ -1767,49 +1977,11 @@
         }
       }
     },
-    "/report/transaction/get-all": {
-      "get": {
-        "tags": [
-          "Report"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "x-access-token",
-            "in": "header",
-            "type": "string"
-          },
-          {
-            "name": "token",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "perPage",
-            "in": "query",
-            "type": "string"
-          },
-          {
-            "name": "page",
-            "in": "query",
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "description": "Unauthorized"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
     "/test": {
       "get": {
+        "tags": [
+          "Test"
+        ],
         "description": "",
         "parameters": [],
         "responses": {}

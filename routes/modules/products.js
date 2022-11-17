@@ -23,6 +23,12 @@ module.exports = {
         */
         try {
             const rows = await xlsxFile(req.file.path);
+            if (!rows[0][0] || !rows[0][1] || !rows[0][2] || !rows[0][3] || !rows[0][4] || !rows[0][5] || !rows[0][6])
+                return res.status(200).json({
+                    status: false,
+                    statusCode: 200,
+                    msg: { en: "Invalid format excel file.", vn: "Tập tin excel không đúng cấu trúc." },
+                });
             if (
                 rows[0][0].toUpperCase() !== "BARCODE" ||
                 rows[0][1].toUpperCase() !== "PRODUCT NAME" ||
@@ -37,7 +43,6 @@ module.exports = {
                     statusCode: 200,
                     msg: { en: "Invalid format excel file.", vn: "Tập tin excel không đúng cấu trúc." },
                 });
-
             rows.forEach(async (element, index) => {
                 if (index > 0) {
                     let supplierQuery = await supplierModel.findOne({ supplierCode: element[4] });
@@ -308,7 +313,7 @@ module.exports = {
             let page = parseInt(req.query.page) || 1;
             productModel
                 .find({})
-                .sort({ updatedAt: -1 })
+                .sort({ quantity: 1 })
                 .skip(perPage * page - perPage)
                 .limit(perPage)
                 .exec((err, productList) => {
@@ -381,7 +386,7 @@ module.exports = {
                             });
                         } else {
                             return res.status(200).json({
-                                status: true,
+                                status: false,
                                 statusCode: 200,
                                 msg: { en: "There is no data.", vn: "Danh sách trống, không có dữ liệu nào." },
                                 result: [],
@@ -431,6 +436,11 @@ module.exports = {
                 worksheet.cell(1, 3).string("Supplier Code").style(titleStyle);
                 worksheet.cell(1, 4).string("Supplier Name").style(titleStyle);
                 worksheet.cell(1, 5).string("Quantity").style(titleStyle);
+                worksheet.column(1).setWidth(30);
+                worksheet.column(2).setWidth(60);
+                worksheet.column(3).setWidth(30);
+                worksheet.column(4).setWidth(60);
+                worksheet.column(5).setWidth(20);
                 await productModel.find({ quantity: 0 }).then((list) => {
                     if (list.length > 0) {
                         list.forEach((product, index) => {

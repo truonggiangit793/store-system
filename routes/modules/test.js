@@ -9,6 +9,7 @@ const transactionModel = require("../../models/transaction");
 
 module.exports = {
     test: async (req, res, next) => {
+        // #swagger.tags = ['Test']
         let myArray = [
             {
                 dateString: "11/10/2022",
@@ -80,6 +81,7 @@ module.exports = {
         next();
     },
     end: async (req, res, next) => {
+        // #swagger.tags = ['Test']
         res.end("Finish test");
     },
 };

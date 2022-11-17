@@ -3,6 +3,7 @@ const customerModel = require("../../models/customer");
 
 module.exports = {
     customerNew: async (req, res, next) => {
+        // #swagger.tags = ['Customers']
         const customerID = req.body.customerID ? req.body.customerID.toUpperCase() : null;
         const fullName = req.body.fullName ? req.body.fullName.toUpperCase() : null;
         const customerQuery = await customerModel.findOne({ customerID });
@@ -46,6 +47,7 @@ module.exports = {
         });
     },
     customerGetAll: async (req, res, next) => {
+        // #swagger.tags = ['Customers']
         const customerQueryAll = await customerModel.find({});
         return res.status(200).json({
             status: true,
@@ -58,7 +60,8 @@ module.exports = {
         });
     },
     customerGetDetail: async (req, res, next) => {
-        const customerID = req.query.customerID ? req.query.customerID.toUpperCase() : null;
+        // #swagger.tags = ['Customers']
+        const customerID = req.params.customerID ? req.params.customerID.toUpperCase() : null;
         const customerQuery = await customerModel.findOne({ customerID }).sort({ updatedAt: -1 });
         if (customerQuery) {
             return res.status(200).json({

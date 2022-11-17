@@ -35,7 +35,13 @@ module.exports = {
         worksheet.cell(1, 4).string("Phone Number").style(titleStyle);
         worksheet.cell(1, 5).string("Password").style(titleStyle);
         worksheet.cell(1, 6).string("Role").style(titleStyle);
-        pipFileStream(res);
+        worksheet.column(1).setWidth(20);
+        worksheet.column(2).setWidth(20);
+        worksheet.column(3).setWidth(20);
+        worksheet.column(4).setWidth(20);
+        worksheet.column(5).setWidth(20);
+        worksheet.column(6).setWidth(20);
+        return pipFileStream(res);
     },
     downloadSupplierExample: async (req, res, next) => {
         // #swagger.tags = ['File Example']
@@ -44,7 +50,11 @@ module.exports = {
         worksheet.cell(1, 2).string("Supplier Name").style(titleStyle);
         worksheet.cell(1, 3).string("Adress").style(titleStyle);
         worksheet.cell(1, 4).string("Phone Number").style(titleStyle);
-        pipFileStream(res);
+        worksheet.column(1).setWidth(20);
+        worksheet.column(2).setWidth(20);
+        worksheet.column(3).setWidth(20);
+        worksheet.column(4).setWidth(20);
+        return pipFileStream(res);
     },
     downloadProductExample: async (req, res, next) => {
         // #swagger.tags = ['File Example']
@@ -56,6 +66,13 @@ module.exports = {
         worksheet.cell(1, 5).string("Supplier Code").style(titleStyle);
         worksheet.cell(1, 6).string("Unit Cost").style(titleStyle);
         worksheet.cell(1, 7).string("Quantity").style(titleStyle);
-        pipFileStream(res);
+        worksheet.column(1).setWidth(20);
+        worksheet.column(2).setWidth(20);
+        worksheet.column(3).setWidth(20);
+        worksheet.column(4).setWidth(20);
+        worksheet.column(5).setWidth(20);
+        worksheet.column(6).setWidth(20);
+        worksheet.column(7).setWidth(20);
+        return pipFileStream(res);
     },
 };

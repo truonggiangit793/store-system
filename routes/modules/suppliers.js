@@ -168,7 +168,7 @@ module.exports = {
                                 status: true,
                                 statusCode: 200,
                                 msg: { en: "Get list of all suppliers.", vn: "Danh sách tất cả nhà cung cấp." },
-                                curentPage: page,
+                                currentPage: page,
                                 totalSuppliers,
                                 pageTotal,
                                 result: {
@@ -178,10 +178,13 @@ module.exports = {
                             });
                         } else {
                             return res.status(200).json({
-                                status: true,
+                                status: false,
                                 statusCode: 200,
                                 msg: { en: "There is no data.", vn: "Danh sách trống, không có dữ liệu nào." },
-                                result: [],
+                                result: {
+                                    perPage: 0,
+                                    data: [],
+                                },
                             });
                         }
                     });
