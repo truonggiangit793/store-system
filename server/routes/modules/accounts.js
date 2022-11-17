@@ -420,6 +420,8 @@ module.exports = {
             );
             if (req.body.role && req.body.role.toUpperCase() == "MANAGER") {
                 await employeeModel.findOneAndUpdate({ userCode }, { preSalary: 40000 });
+            } else {
+                await employeeModel.findOneAndUpdate({ userCode }, { preSalary: 25000 });
             }
             return res.status(200).json({
                 status: true,

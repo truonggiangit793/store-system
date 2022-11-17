@@ -270,13 +270,16 @@ module.exports = {
             const dayTo = parseInt(dateTo.split("/")[0]);
             const monthTo = parseInt(dateTo.split("/")[1]) - 1;
             const yearTo = parseInt(dateTo.split("/")[2]);
-            timeTo = new Date(yearTo, monthTo, dayTo, 11, 0, 0);
+            timeTo = new Date(yearTo, monthTo, dayTo, 23, 59, 59);
         }
 
         const dayFrom = parseInt(dateFrom.split("/")[0]);
         const monthFrom = parseInt(dateFrom.split("/")[1]) - 1;
         const yearFrom = parseInt(dateFrom.split("/")[2]);
-        const timeFrom = new Date(yearFrom, monthFrom, dayFrom, 11, 0, 0);
+        const timeFrom = new Date(yearFrom, monthFrom, dayFrom, 0, 0, 0);
+
+        console.log({ timeFrom, timeTo });
+
         if (timeTo < timeFrom)
             return res.status(200).json({
                 status: false,
