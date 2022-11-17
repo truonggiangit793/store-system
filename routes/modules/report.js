@@ -12,11 +12,14 @@ module.exports = {
         // #swagger.tags = ['Report']
         try {
             const perPageMaxSize = 50;
-            let perPage = parseInt(req.query.perPage) ? (parseInt(req.query.perPage) >= perPageMaxSize ? perPageMaxSize : parseInt(req.query.perPage)) : perPageMaxSize;
+            let perPage = parseInt(req.query.perPage)
+                ? parseInt(req.query.perPage) >= perPageMaxSize
+                    ? perPageMaxSize
+                    : parseInt(req.query.perPage)
+                : perPageMaxSize;
             let page = parseInt(req.query.page) || 1;
             transactionModel
                 .find({ payStatus: true })
-                .sort({ updatedAt: -1 })
                 .skip(perPage * page - perPage)
                 .limit(perPage)
                 .exec((err, transactionList) => {
@@ -55,4 +58,5 @@ module.exports = {
             });
         }
     },
+   
 };

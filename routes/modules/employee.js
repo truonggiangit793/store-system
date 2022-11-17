@@ -106,6 +106,9 @@ module.exports = {
                 });
             const timeFrom = new Date(parseInt(dateFrom.split("/")[2]), parseInt(dateFrom.split("/")[1]) - 1, parseInt(dateFrom.split("/")[0]), 11, 0, 0);
             const timeTo = new Date(parseInt(dateTo.split("/")[2]), parseInt(dateTo.split("/")[1]) - 1, parseInt(dateTo.split("/")[0]), 11, 0, 0);
+            const timeTmp = timeTo.getTime() - timeFrom.getTime();
+            const time_between = Math.ceil(timeTmp / (1000 * 3600 * 24))
+            console.log(time_between)
             if (timeTo < timeFrom)
                 return res.status(200).json({
                     status: false,
@@ -144,6 +147,13 @@ module.exports = {
                 };
             });
 
+            // HANDLE EXECL EXPORT FILE ====================================================== 
+
+            const columns = time_between + 5;
+            const rows = finalData.length + 1;
+            // console.log(column, row)
+
+           
             // Code here=================================================================
             return res.status(200).json({
                 status: true,
@@ -167,4 +177,5 @@ module.exports = {
             });
         }
     },
+   
 };

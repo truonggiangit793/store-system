@@ -166,7 +166,7 @@ Router.get("/attendance/report", authentication, attendanceReport);
 
 Router.get("/employee/salary/visualize", authentication, authorization.admin, employeeSalaryVisualize);
 Router.post("/employee/salary/updateSalary", authentication, authorization.admin, employeeUpdateSalary);
-Router.post("/employee/salary/export", authentication, authorization.admin, exportSalaryPerMonth);
+// Router.post("/employee/salary/export", authentication, authorization.admin, exportSalaryPerMonth);
 
 /**
  * Report ================================================================
