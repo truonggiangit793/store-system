@@ -7,6 +7,7 @@ const accountModel = require("../../models/account");
 const employeeModel = require("../../models/employee");
 const adminConfig = require("../../configs/adminConfig");
 const roleConfig = require("../../configs/roleConfig");
+const { role } = require("../../configs/adminConfig");
 
 module.exports = {
     accountLogin: async (req, res, next) => {
@@ -417,6 +418,9 @@ module.exports = {
                 },
                 { upsert: true, new: true, setDefaultsOnInsert: true }
             );
+            if (req.body.role && req.body.role.toUpperCase() == "MANAGER") {
+                await employeeModel.findOneAndUpdate({ userCode }, { preSalary: 40000 });
+            }
             return res.status(200).json({
                 status: true,
                 statusCode: 200,

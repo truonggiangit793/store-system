@@ -22,13 +22,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "client")));
 
-const outputFile = "./services/swagger_output.json";
-const endpointsFiles = ["./routes/api.js"];
+const outputFile = "../services/swagger_output.json";
+const endpointsFiles = ["././server/routes/api.js"];
 const doc = {
     info: {
         title: "Store System RESTful API Document",
     },
-    host: `localhost:${process.env.PORT}/api/v1`,
+    host: `localhost:${process.env.PORT || process.env.SERVER_PORT}/api/v1`,
 };
 swaggerAutogen(outputFile, endpointsFiles, doc);
 
