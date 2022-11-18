@@ -131,11 +131,13 @@ module.exports = {
                     };
                 });
 
+            let totalSalary = 0;
             const finalData = userCodeArray.map((element) => {
                 let data = attendanceQueryAll.filter((e) => timeFrom <= e.checkIn && e.checkIn <= timeTo && e.userCode === element.userCode);
                 let finalWorkTime = data.reduce((result, currentObject, currentIndex) => {
                     return (result += currentObject.totalWorkTime);
                 }, 0);
+                totalSalary += element.preSalary * finalWorkTime;
                 return {
                     userCode: element.userCode,
                     fullName: element.fullName,
@@ -158,6 +160,7 @@ module.exports = {
                     endDate: timeTo,
                 },
                 result: finalData,
+                totalSalary,
             });
         } catch (error) {
             return res.status(500).json({

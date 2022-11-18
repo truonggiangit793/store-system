@@ -119,9 +119,9 @@ module.exports = {
                         {
                             userCode: element[0].toUpperCase(),
                             fullName: element[1].toUpperCase(),
-                            email: element[2],
-                            phoneNumber: element[3],
-                            password: bcrypt.hashSync(element[4], bcrypt.genSaltSync(10)),
+                            email: element[2].toString(),
+                            phoneNumber: element[3].toString(),
+                            password: bcrypt.hashSync(element[4].toString(), bcrypt.genSaltSync(10)),
                             role: element[5] ? (element[5].toUpperCase() == roleConfig.admin ? roleConfig.cashier : element[5].toUpperCase()) : null,
                         },
                         { upsert: true, new: true, setDefaultsOnInsert: true }
