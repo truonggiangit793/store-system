@@ -180,6 +180,7 @@ Router.get("/employee/get-all", authentication, authorization.manager, employeeG
 Router.get("/employee/:userCode/detail", authentication, authorization.manager, employeeGetDetail);
 
 Router.post("/employee/salary/updateSalary", authentication, authorization.admin, employeeUpdateSalary);
+// Router.post("/employee/salary/export", authentication, authorization.admin, exportSalaryPerMonth);
 
 /**
  * Report ================================================================
