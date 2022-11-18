@@ -121,7 +121,7 @@ module.exports = {
                             fullName: element[1].toUpperCase(),
                             email: element[2],
                             phoneNumber: element[3],
-                            password: bcrypt.hashSync(element[4].toUpperCase(), bcrypt.genSaltSync(10)),
+                            password: bcrypt.hashSync(element[4], bcrypt.genSaltSync(10)),
                             role: element[5] ? (element[5].toUpperCase() == roleConfig.admin ? roleConfig.cashier : element[5].toUpperCase()) : null,
                         },
                         { upsert: true, new: true, setDefaultsOnInsert: true }
@@ -229,7 +229,7 @@ module.exports = {
                     fullName,
                     email,
                     phoneNumber,
-                    password: bcrypt.hashSync(password.toUpperCase(), bcrypt.genSaltSync(10)),
+                    password: bcrypt.hashSync(password, bcrypt.genSaltSync(10)),
                     role,
                 });
                 if (role.includes("MANAGER")) {

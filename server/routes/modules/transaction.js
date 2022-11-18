@@ -10,6 +10,7 @@ const accountModel = require("../../models/account");
 const customerModel = require("../../models/customer");
 const transactionModel = require("../../models/transaction");
 const phoneNumberValidator = require("validate-phone-number-node-js");
+const { log } = require("console");
 
 module.exports = {
     transactionNew: async (req, res, next) => {
@@ -668,5 +669,64 @@ module.exports = {
                 error: error.message,
             });
         }
+    },
+    transactionTopWeek: async (req, res, next) => {
+        // #swagger.tags = ['Transaction']
+        const transactionQueryAll = await transactionModel.find({});
+        const date = new Date();
+        const today = Date.parse(new Date(date.getFullYear(), date.getMonth() + 1, date.getDate(), 23, 59, 59)) / 1000;
+        const day7 = today - 60 * 60 * 24;
+        const day6 = today - 60 * 60 * 24 * 2;
+        const day5 = today - 60 * 60 * 24 * 3;
+        const day4 = today - 60 * 60 * 24 * 4;
+        const day3 = today - 60 * 60 * 24 * 5;
+        const day2 = today - 60 * 60 * 24 * 6;
+        const day1 = today - 60 * 60 * 24 * 7;
+        const data = {
+            today: {
+                dateTime: today,
+                data: transactionQueryAll.find((e) => {
+                    console.log(Date.parse(e.createdAt));
+                    return Date.parse(e.createdAt) > day7 && Date.parse(e.createdAt) <= today;
+                }),
+            },
+            day7: {
+                dateTime: day7,
+                data: transactionQueryAll.find((e) => {
+                    return Date.parse(e.createdAt) > day6 && Date.parse(e.createdAt) <= day7;
+                }),
+            },
+            day6: {
+                dateTime: day6,
+                data: transactionQueryAll.find((e) => {
+                    return Date.parse(e.createdAt) > day5 && Date.parse(e.createdAt) <= day6;
+                }),
+            },
+            day5: {
+                dateTime: day5,
+                data: transactionQueryAll.find((e) => {
+                    return Date.parse(e.createdAt) > day4 && Date.parse(e.createdAt) <= day5;
+                }),
+            },
+            day4: {
+                dateTime: day4,
+                data: transactionQueryAll.find((e) => {
+                    return Date.parse(e.createdAt) > day3 && Date.parse(e.createdAt) <= day4;
+                }),
+            },
+            day3: {
+                dateTime: day3,
+                data: transactionQueryAll.find((e) => {
+                    return Date.parse(e.createdAt) > day2 && Date.parse(e.createdAt) <= day3;
+                }),
+            },
+            day2: {
+                dateTime: day2,
+                data: transactionQueryAll.find((e) => {
+                    return Date.parse(e.createdAt) > day1 && Date.parse(e.createdAt) <= day2;
+                }),
+            },
+        };
+        console.log(data);
     },
 };

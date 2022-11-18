@@ -16,28 +16,34 @@
                         <th scope="col" class="py-3 px-6">Role</th>
                         <th scope="col" class="py-3 px-6">Created At</th>
                         <th scope="col" class="py-3 px-6">Last modified</th>
-                        <th scope="col" class="py-3 px-6">Action</th>
+                        <th scope="col" class="py-3 px-6" v-if="payload.role == 'ADMIN'">Action</th>
                     </tr>
                 </thead>
                 <tbody v-if="accountList && accountList.data.length > 0">
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700" v-for="(account, i) in accountList.data" :key="i">
-                        <router-link :to="'/dashboard/account/' + account.userCode + '/detail'">
+                        <router-link :to="'/dashboard/account/' + account.userCode + '/detail'" v-if="payload.role == 'ADMIN'">
                             <th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                 {{ account.userCode }}
                             </th>
                         </router-link>
+                        <th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white" v-else>
+                            {{ account.userCode }}
+                        </th>
                         <td class="py-4 px-6">{{ account.fullName }}</td>
                         <td class="py-4 px-6">{{ account.email }}</td>
                         <td class="py-4 px-6">{{ account.phoneNumber }}</td>
                         <td class="py-4 px-6">{{ account.role }}</td>
                         <td class="py-4 px-6">{{ dateFormat(account.createdAt) }}</td>
                         <td class="py-4 px-6">{{ dateFormat(account.updatedAt) }}</td>
-                        <td class="py-4 px-6" v-on:click="accountRemoveHandler(account.userCode)">
+                        <td class="py-4 px-6" v-on:click="accountRemoveHandler(account.userCode)" v-if="payload.role == 'ADMIN'">
                             <div class="text-red-500 cursor-pointer"><ThemifyIcon icon="trash" />Delete</div>
                         </td>
                     </tr>
                 </tbody>
             </table>
+            <div v-if="!accountList" class="flex w-full justify-center p-8">
+                <h1 class="">Empty list, there is no data!</h1>
+            </div>
         </div>
     </main>
 </template>
@@ -64,27 +70,37 @@ export default {
         dateFormat,
         async fetchData() {
             this.isLoading = true;
-            await axios.get(`${process.env.VUE_APP_API_URL}/account/get-all?token=${this.accessToken}`).then((res) => {
-                if (res.data.status) {
-                    this.accountList = res.data.result;
-                }
-            });
+            await axios
+                .get(`${process.env.VUE_APP_API_URL}/account/get-all?token=${this.accessToken}`)
+                .then((res) => {
+                    if (res.data.status) {
+                        this.accountList = res.data.result;
+                    }
+                })
+                .catch(() => {
+                    this.accountList = null;
+                });
             this.isLoading = false;
         },
         async accountRemoveHandler(userCode) {
             this.isLoading = true;
-            await axios.delete(`${process.env.VUE_APP_API_URL}/account/disable/${userCode}?token=${this.accessToken}`).then((res) => {
-                if (res.data.status) {
-                    this.toastify.success(res.data.msg.en);
-                } else {
-                    this.toastify.error(res.data.msg.en);
-                }
-            });
+            await axios
+                .delete(`${process.env.VUE_APP_API_URL}/account/disable/${userCode}?token=${this.accessToken}`)
+                .then((res) => {
+                    if (res.data.status) {
+                        this.toastify.success(res.data.msg.en);
+                    } else {
+                        this.toastify.error(res.data.msg.en);
+                    }
+                })
+                .catch((err) => {
+                    this.toastify.error(err.response.data.msg.en);
+                });
             this.fetchData();
             this.isLoading = false;
         },
     },
-    computed: { ...mapState(["accessToken", "toastify"]) },
+    computed: { ...mapState(["accessToken", "payload", "toastify"]) },
     components: { ThemifyIcon, Loading },
 };
 </script>

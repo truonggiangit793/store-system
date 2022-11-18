@@ -42,6 +42,7 @@ const {
     transactionGetAll,
     transactionVisualize,
     transactionVisualizeExport,
+    transactionTopWeek,
 } = require("./modules/transaction");
 
 const { supplierImport, supplierRegister, supplierDelete, supplierGetAll, supplierGetDetail } = require("./modules/suppliers");
@@ -64,59 +65,59 @@ Router.post("/account/register", authentication, authorization.admin, accountReg
 
 Router.delete("/account/disable/:userCode", authentication, authorization.admin, accountDisable);
 
-Router.get("/account/:userCode/detail", authentication, accountGetDetail);
+Router.get("/account/:userCode/detail", authentication, authorization.manager, accountGetDetail);
 
 Router.get("/account/me", authentication, accountGetProfile);
 
-Router.put("/account/:userCode/update", authentication, accountUpdate);
+Router.put("/account/:userCode/update", authentication, authorization.manager, accountUpdate);
 
 Router.put("/account/change-password", authentication, accountChangePassword);
 
-Router.get("/account/get-all", authentication, authorization.admin, accountGetAll);
+Router.get("/account/get-all", authentication, authorization.manager, accountGetAll);
 
-Router.get("/account/download-example", authentication, downloadExample.downloadAccountExample);
+Router.get("/account/download-example", authentication, authorization.manager, downloadExample.downloadAccountExample);
 
 /**
  * Supplier ================================================================
  */
 
-Router.post("/supplier/import", authentication, authorization.admin, multerService, supplierImport);
+Router.post("/supplier/import", authentication, authorization.manager, multerService, supplierImport);
 
-Router.post("/supplier/register", authentication, authorization.admin, supplierRegister);
+Router.post("/supplier/register", authentication, authorization.manager, supplierRegister);
 
-Router.get("/supplier/get-detail", authentication, authorization.admin, supplierGetDetail);
+Router.get("/supplier/get-detail", authentication, authorization.manager, supplierGetDetail);
 
-Router.get("/supplier/get-all", authentication, authorization.admin, supplierGetAll);
+Router.get("/supplier/get-all", authentication, authorization.manager, supplierGetAll);
 
-Router.delete("/supplier/delete/:supplierCode", authentication, authorization.admin, supplierDelete);
+Router.delete("/supplier/delete/:supplierCode", authentication, authorization.manager, supplierDelete);
 
-Router.get("/supplier/download-example", authentication, downloadExample.downloadSupplierExample);
+Router.get("/supplier/download-example", authentication, authorization.manager, downloadExample.downloadSupplierExample);
 
 /**
  * Product ================================================================
  */
 
-Router.post("/product/import", authentication, authorization.admin, multerService, productImport);
+Router.post("/product/import", authentication, authorization.manager, multerService, productImport);
 
-Router.post("/product/quantity-import", authentication, authorization.admin, multerService, productQuantityImport);
+Router.post("/product/quantity-import", authentication, authorization.manager, multerService, productQuantityImport);
 
-Router.post("/product/register", authentication, authorization.admin, productRegister);
+Router.post("/product/register", authentication, authorization.manager, productRegister);
 
 Router.get("/product/get-detail", authentication, productGetDetail);
 
 Router.get("/product/get-all", authentication, productGetAll);
 
-Router.get("/product/get-out-of-stock", authentication, productGetOutOfStock);
+Router.get("/product/get-out-of-stock", authentication, authorization.manager, productGetOutOfStock);
 
-Router.get("/product/out-of-stock/export", authentication, productOutOfStockExport);
+Router.get("/product/out-of-stock/export", authentication, authorization.manager, productOutOfStockExport);
 
-Router.delete("/product/delete/:barcode", authentication, productDelete);
+Router.delete("/product/delete/:barcode", authentication, authorization.manager, productDelete);
 
-Router.put("/product/update-quantity", authentication, authorization.admin, productUpdateQuantity);
+Router.put("/product/update-quantity", authentication, authorization.manager, productUpdateQuantity);
 
 Router.get("/product/download-example", authentication, downloadExample.downloadProductExample);
 
-Router.put("/product/update-price", authentication, authorization.admin, productUpdatePrice);
+Router.put("/product/update-price", authentication, authorization.manager, productUpdatePrice);
 
 /**
  * Customer ================================================================
@@ -135,6 +136,8 @@ Router.get("/customer/:customerID/detail", authentication, customerGetDetail);
 Router.post("/transaction/new", authentication, transactionNew);
 
 Router.get("/transaction/get-all", authentication, transactionGetAll);
+
+Router.get("/transaction/top-week", authentication, transactionTopWeek);
 
 Router.get("/transaction/visualize", authentication, authorization.admin, transactionVisualize);
 
@@ -172,9 +175,9 @@ Router.get("/employee/salary/visualize", authentication, authorization.admin, em
 
 Router.get("/employee/salary/visualize/export", authentication, authorization.admin, employeeSalaryVisualizeExport);
 
-Router.get("/employee/get-all", authentication, authorization.admin, employeeGetAll);
+Router.get("/employee/get-all", authentication, authorization.manager, employeeGetAll);
 
-Router.get("/employee/:userCode/detail", authentication, authorization.admin, employeeGetDetail);
+Router.get("/employee/:userCode/detail", authentication, authorization.manager, employeeGetDetail);
 
 Router.post("/employee/salary/updateSalary", authentication, authorization.admin, employeeUpdateSalary);
 // Router.post("/employee/salary/export", authentication, authorization.admin, exportSalaryPerMonth);

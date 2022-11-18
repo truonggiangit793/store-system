@@ -52,7 +52,7 @@
                                     <li class="p-1 pl-2">Employees list</li>
                                 </div>
                             </router-link>
-                            <router-link to="/dashboard/account/register">
+                            <router-link to="/dashboard/account/register" v-if="payload.role == 'ADMIN'">
                                 <div class="flex items-center w-full pl-6 transition-all">
                                     <ThemifyIcon icon="plus" />
                                     <li class="p-1 pl-2">Import data</li>
@@ -91,7 +91,7 @@
                             </router-link>
                         </ul>
                         <hr class="my-4 opacity-50" />
-                        <ul class="mb-3">
+                        <ul class="mb-3" v-if="payload.role == 'ADMIN'">
                             <div class="flex items-center mb-1 text-white">
                                 <ThemifyIcon icon="arrow-circle-right" />
                                 <h1 class="ml-2 font-bold uppercase">Finance Management</h1>
