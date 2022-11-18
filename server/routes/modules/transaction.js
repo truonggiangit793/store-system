@@ -11,6 +11,7 @@ const customerModel = require("../../models/customer");
 const transactionModel = require("../../models/transaction");
 const phoneNumberValidator = require("validate-phone-number-node-js");
 const { log } = require("console");
+const transaction = require("../../models/transaction");
 
 module.exports = {
     transactionNew: async (req, res, next) => {
@@ -673,60 +674,133 @@ module.exports = {
     transactionTopWeek: async (req, res, next) => {
         // #swagger.tags = ['Transaction']
         const transactionQueryAll = await transactionModel.find({});
+
         const date = new Date();
-        const today = Date.parse(new Date(date.getFullYear(), date.getMonth() + 1, date.getDate(), 23, 59, 59)) / 1000;
-        const day7 = today - 60 * 60 * 24;
-        const day6 = today - 60 * 60 * 24 * 2;
-        const day5 = today - 60 * 60 * 24 * 3;
-        const day4 = today - 60 * 60 * 24 * 4;
-        const day3 = today - 60 * 60 * 24 * 5;
-        const day2 = today - 60 * 60 * 24 * 6;
-        const day1 = today - 60 * 60 * 24 * 7;
+        const today = new Date((Date.parse(new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59)) / 1000) * 1000);
+        const day7 = new Date(today - 60 * 60 * 24 * 1000);
+        const day6 = new Date(today - 60 * 60 * 24 * 2 * 1000);
+        const day5 = new Date(today - 60 * 60 * 24 * 3 * 1000);
+        const day4 = new Date(today - 60 * 60 * 24 * 4 * 1000);
+        const day3 = new Date(today - 60 * 60 * 24 * 5 * 1000);
+        const day2 = new Date(today - 60 * 60 * 24 * 6 * 1000);
+        const day1 = new Date(today - 60 * 60 * 24 * 7 * 1000);
+
+        let weekSaleTotal = 0;
+
         const data = {
             today: {
                 dateTime: today,
-                data: transactionQueryAll.find((e) => {
-                    console.log(Date.parse(e.createdAt));
-                    return Date.parse(e.createdAt) > day7 && Date.parse(e.createdAt) <= today;
+                daySale: transactionQueryAll.reduce((total, transaction, index) => {
+                    if (transaction.createdAt > day7 && transaction.createdAt <= today) {
+                        total += transaction.totalPrice;
+                    }
+                    return total;
+                }, 0),
+                data: transactionQueryAll.filter((transaction) => {
+                    if (transaction.createdAt > day7 && transaction.createdAt <= today) {
+                        weekSaleTotal += transaction.totalPrice;
+                        return transaction;
+                    }
                 }),
             },
             day7: {
                 dateTime: day7,
-                data: transactionQueryAll.find((e) => {
-                    return Date.parse(e.createdAt) > day6 && Date.parse(e.createdAt) <= day7;
+                daySale: transactionQueryAll.reduce((total, transaction, index) => {
+                    if (transaction.createdAt > day6 && transaction.createdAt <= day7) {
+                        total += transaction.totalPrice;
+                    }
+                    return total;
+                }, 0),
+                data: transactionQueryAll.filter((transaction) => {
+                    if (transaction.createdAt > day6 && transaction.createdAt <= day7) {
+                        weekSaleTotal += transaction.totalPrice;
+                        return transaction;
+                    }
                 }),
             },
             day6: {
                 dateTime: day6,
-                data: transactionQueryAll.find((e) => {
-                    return Date.parse(e.createdAt) > day5 && Date.parse(e.createdAt) <= day6;
+                daySale: transactionQueryAll.reduce((total, transaction, index) => {
+                    if (transaction.createdAt > day5 && transaction.createdAt <= day6) {
+                        total += transaction.totalPrice;
+                    }
+                    return total;
+                }, 0),
+                data: transactionQueryAll.filter((transaction) => {
+                    if (transaction.createdAt > day5 && transaction.createdAt <= day6) {
+                        weekSaleTotal += transaction.totalPrice;
+                        return transaction;
+                    }
                 }),
             },
             day5: {
                 dateTime: day5,
-                data: transactionQueryAll.find((e) => {
-                    return Date.parse(e.createdAt) > day4 && Date.parse(e.createdAt) <= day5;
+                daySale: transactionQueryAll.reduce((total, transaction, index) => {
+                    if (transaction.createdAt > day4 && transaction.createdAt <= day5) {
+                        total += transaction.totalPrice;
+                    }
+                    return total;
+                }, 0),
+                data: transactionQueryAll.filter((transaction) => {
+                    if (transaction.createdAt > day4 && transaction.createdAt <= day5) {
+                        weekSaleTotal += transaction.totalPrice;
+                        return transaction;
+                    }
                 }),
             },
             day4: {
                 dateTime: day4,
-                data: transactionQueryAll.find((e) => {
-                    return Date.parse(e.createdAt) > day3 && Date.parse(e.createdAt) <= day4;
+                daySale: transactionQueryAll.reduce((total, transaction, index) => {
+                    if (transaction.createdAt > day3 && transaction.createdAt <= day4) {
+                        total += transaction.totalPrice;
+                    }
+                    return total;
+                }, 0),
+                data: transactionQueryAll.filter((transaction) => {
+                    if (transaction.createdAt > day3 && transaction.createdAt <= day4) {
+                        weekSaleTotal += transaction.totalPrice;
+                        return transaction;
+                    }
                 }),
             },
             day3: {
                 dateTime: day3,
-                data: transactionQueryAll.find((e) => {
-                    return Date.parse(e.createdAt) > day2 && Date.parse(e.createdAt) <= day3;
+                daySale: transactionQueryAll.reduce((total, transaction, index) => {
+                    if (transaction.createdAt > day2 && transaction.createdAt <= day3) {
+                        total += transaction.totalPrice;
+                    }
+                    return total;
+                }, 0),
+                data: transactionQueryAll.filter((transaction) => {
+                    if (transaction.createdAt > day2 && transaction.createdAt <= day3) {
+                        weekSaleTotal += transaction.totalPrice;
+                        return transaction;
+                    }
                 }),
             },
             day2: {
                 dateTime: day2,
-                data: transactionQueryAll.find((e) => {
-                    return Date.parse(e.createdAt) > day1 && Date.parse(e.createdAt) <= day2;
+                daySale: transactionQueryAll.reduce((total, transaction, index) => {
+                    if (transaction.createdAt > day1 && transaction.createdAt <= day2) {
+                        total += transaction.totalPrice;
+                    }
+                    return total;
+                }, 0),
+                data: transactionQueryAll.filter((transaction) => {
+                    if (transaction.createdAt > day1 && transaction.createdAt <= day2) {
+                        weekSaleTotal += transaction.totalPrice;
+                        return transaction;
+                    }
                 }),
             },
         };
-        console.log(data);
+        res.status(200).json({
+            status: true,
+            statusCode: 200,
+            result: {
+                weekSaleTotal,
+                data,
+            },
+        });
     },
 };

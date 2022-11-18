@@ -8,6 +8,44 @@
             <ThemifyIcon icon="shopping-cart" />
             <button class="ml-3">Create New Transaction</button>
         </div>
+        <div class="mb-6">
+            <bar-chart
+                :height="100"
+                :chart-options="{ responsive: true }"
+                :chart-data="{
+                    labels: [
+                        dateFormatV2(weekSalesData.data.day2.dateTime),
+                        dateFormatV2(weekSalesData.data.day3.dateTime),
+                        dateFormatV2(weekSalesData.data.day4.dateTime),
+                        dateFormatV2(weekSalesData.data.day5.dateTime),
+                        dateFormatV2(weekSalesData.data.day6.dateTime),
+                        dateFormatV2(weekSalesData.data.day7.dateTime),
+                        dateFormatV2(weekSalesData.data.today.dateTime),
+                    ],
+                    datasets: [
+                        {
+                            label: 'Top week sales',
+                            backgroundColor: '#468b69',
+                            data: [
+                                weekSalesData.data.day2.daySale,
+                                weekSalesData.data.day3.daySale,
+                                weekSalesData.data.day4.daySale,
+                                weekSalesData.data.day5.daySale,
+                                weekSalesData.data.day6.daySale,
+                                weekSalesData.data.day7.daySale,
+                                weekSalesData.data.today.daySale,
+                            ],
+                        },
+                    ],
+                }"
+            ></bar-chart>
+        </div>
+        <div class="mb-4 flex items-center justify-center text-gray-900">
+            <div class="text-center">
+                <h1 class="font-bold">Total: {{ priceFormat(weekSalesData.weekSaleTotal) }}</h1>
+                <h1>Sales data in a week (From {{ dateFormatV2(weekSalesData.data.day2.dateTime) }} to {{ dateFormatV2(weekSalesData.data.today.dateTime) }})</h1>
+            </div>
+        </div>
         <div class="mb-4 flex items-center text-green-900 font-bold text-xl">
             <ThemifyIcon icon="settings" />
             <h1 class="ml-2">List of transactions:</h1>
@@ -63,29 +101,39 @@ import axios from "axios";
 import { mapState } from "vuex";
 import ThemifyIcon from "vue-themify-icons/ThemifyIcon.vue";
 import dateFormat from "@/helpers/dateFormat";
+import dateFormatV2 from "../helpers/dateFormatV2";
 import priceFormat from "../helpers/priceFormat";
 import Loading from "vue-loading-overlay";
 import "vue-loading-overlay/dist/vue-loading.css";
+import { Bar as BarChart } from "vue-chartjs/legacy";
+import { Chart as ChartJS, Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale } from "chart.js";
+ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
 
 export default {
     name: "POSView",
     data() {
         return {
-            isLoading: true,
+            isLoading: false,
             transactionList: null,
+            weekSalesData: null,
         };
     },
     async mounted() {
-        await axios.get(`${process.env.VUE_APP_API_URL}/transaction/get-all?token=${this.$store.state.accessToken}`).then((res) => {
+        this.isLoading = true;
+        await axios.get(`${process.env.VUE_APP_API_URL}/transaction/get-all?token=${this.accessToken}`).then((res) => {
             if (res.data.status && res.data.data) {
                 this.transactionList = res.data.data;
             }
+        });
+        await axios.get(`${process.env.VUE_APP_API_URL}/transaction/top-week?token=${this.accessToken}`).then((res) => {
+            this.weekSalesData = res.data.result;
         });
         this.isLoading = false;
     },
     methods: {
         dateFormat,
         priceFormat,
+        dateFormatV2,
         async newTransactionHandler() {
             this.isLoading = true;
             await axios.post(`${process.env.VUE_APP_API_URL}/transaction/new?token=${this.accessToken}`).then((res) => {
@@ -99,7 +147,7 @@ export default {
             this.isLoading = false;
         },
     },
-    components: { ThemifyIcon, Loading },
+    components: { ThemifyIcon, Loading, BarChart },
     computed: {
         ...mapState(["accessToken", "toastify"]),
     },
