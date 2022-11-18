@@ -18,11 +18,14 @@
                 </thead>
                 <tbody v-if="employeeList.length > 0">
                     <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700" v-for="(employee, i) in employeeList" :key="i">
-                        <router-link :to="'/employee/' + employee.userCode + '/detail'">
+                        <router-link :to="'/employee/' + employee.userCode + '/detail'" v-if="payload.role == 'ADMIN'">
                             <th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                 {{ employee.userCode }}
                             </th>
                         </router-link>
+                        <th scope="row" class="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white" v-else>
+                            {{ employee.userCode }}
+                        </th>
                         <td class="py-4 px-6">{{ employee.fullName }}</td>
                         <td class="py-4 px-6">{{ priceFormat(employee.preSalary) }}</td>
                         <td class="py-4 px-6">{{ employee.role }}</td>
@@ -61,17 +64,22 @@ export default {
         priceFormat,
         async fetchData() {
             this.isLoading = true;
-            await axios.get(`${process.env.VUE_APP_API_URL}/employee/get-all?&token=${this.accessToken}`).then((res) => {
-                if (res.data.status && res.data.result.length > 0) {
-                    this.employeeList = res.data.result;
-                } else {
+            await axios
+                .get(`${process.env.VUE_APP_API_URL}/employee/get-all?&token=${this.accessToken}`)
+                .then((res) => {
+                    if (res.data.status && res.data.result.length > 0) {
+                        this.employeeList = res.data.result;
+                    } else {
+                        this.employeeList = [];
+                    }
+                })
+                .catch(() => {
                     this.employeeList = [];
-                }
-            });
+                });
             this.isLoading = false;
         },
     },
-    computed: { ...mapState(["accessToken", "toastify"]) },
+    computed: { ...mapState(["accessToken", "payload", "toastify"]) },
     components: { ThemifyIcon, Loading },
 };
 </script>

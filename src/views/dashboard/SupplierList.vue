@@ -84,16 +84,21 @@ export default {
         async fetchData(page = 1) {
             this.isLoading = true;
             let pageSelect = this.$route.query ? parseInt(this.$route.query.page) : page;
-            await axios.get(`${process.env.VUE_APP_API_URL}/supplier/get-all?page=${pageSelect}&token=${this.accessToken}`).then((res) => {
-                if (res.data.status && (res.data.result.perPage ? true : false)) {
-                    console.log(res.data);
-                    this.supplierList = res.data.result.data;
-                    this.pageData.currentPage = res.data.currentPage;
-                    this.pageData.pageTotal = res.data.pageTotal;
-                } else {
+            await axios
+                .get(`${process.env.VUE_APP_API_URL}/supplier/get-all?page=${pageSelect}&token=${this.accessToken}`)
+                .then((res) => {
+                    if (res.data.status && (res.data.result.perPage ? true : false)) {
+                        console.log(res.data);
+                        this.supplierList = res.data.result.data;
+                        this.pageData.currentPage = res.data.currentPage;
+                        this.pageData.pageTotal = res.data.pageTotal;
+                    } else {
+                        this.productsData = [];
+                    }
+                })
+                .catch(() => {
                     this.productsData = [];
-                }
-            });
+                });
             this.isLoading = false;
         },
         async handleDelete(barcode = null) {

@@ -22,9 +22,14 @@
                 <div>
                     <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Basic salary</label>
                     <input
+                        :disabled="payload.role != 'ADMIN'"
+                        :class="{
+                            ' bg-gray-200 text-gray-500': payload.role != 'ADMIN',
+                            'border-gray-300 text-gray-900': payload.role == 'ADMIN',
+                        }"
                         v-model="employee.preSalary"
                         type="number"
-                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+                        class="border-gray-200 border text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
                     />
                 </div>
                 <div>
@@ -35,7 +40,11 @@
             <button
                 type="submit"
                 v-on:click="updateSalaryHandler"
-                class="text-white transition-all bg-blue-400 hover:bg-blue-500 focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-8 py-2.5 text-center"
+                :class="{
+                    'bg-blue-400 hover:bg-blue-500 ': payload.role == 'ADMIN',
+                    'bg-gray-400 cursor-default': payload.role != 'ADMIN',
+                }"
+                class="text-white transition-all focus:outline-none font-medium rounded-lg text-sm w-full sm:w-auto px-8 py-2.5 text-center"
             >
                 Update
             </button>
@@ -75,12 +84,14 @@ export default {
                     newSalary: this.employee.preSalary,
                 })
                 .then((res) => {
-                    console.log(res);
                     if (res.data.status) {
                         this.toastify.success(res.data.msg.en);
                     } else {
                         this.toastify.error(res.data.msg.en);
                     }
+                })
+                .catch((err) => {
+                    this.toastify.error(err.response.data.msg.en);
                 });
             this.isLoading = false;
             this.fetchData();
