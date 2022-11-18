@@ -5,6 +5,9 @@
             <ThemifyIcon icon="menu" />
             <h1 class="ml-2">List of all suppliers:</h1>
         </div>
+        <div class="flex items-center mb-4 text-gray-700 font-bold text-md uppercase">
+            <h1 class="ml-2">Total suppliers: {{ totalSuppliers }}</h1>
+        </div>
         <div class="overflow-x-auto relative">
             <table class="overflow-scroll w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-4">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -68,6 +71,7 @@ export default {
                 currentPage: 1,
                 pageTotal: 0,
             },
+            totalSuppliers: 0,
         };
     },
     async mounted() {
@@ -92,6 +96,7 @@ export default {
                         this.supplierList = res.data.result.data;
                         this.pageData.currentPage = res.data.currentPage;
                         this.pageData.pageTotal = res.data.pageTotal;
+                        this.totalSuppliers = res.data.totalSuppliers;
                     } else {
                         this.productsData = [];
                     }

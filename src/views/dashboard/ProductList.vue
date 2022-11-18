@@ -5,6 +5,9 @@
             <ThemifyIcon icon="menu" />
             <h1 class="ml-2">List of all products</h1>
         </div>
+        <div class="flex items-center mb-4 text-gray-700 font-bold text-md uppercase">
+            <h1 class="ml-2">Total products: {{ totalProducts }}</h1>
+        </div>
         <div class="overflow-x-auto relative">
             <table class="overflow-scroll w-full text-sm text-left text-gray-500 dark:text-gray-400 mb-4">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -76,6 +79,7 @@ export default {
                 statusCode: null,
                 totalProducts: null,
             },
+            totalProducts: 0,
         };
     },
     async mounted() {
@@ -95,6 +99,7 @@ export default {
             await axios.get(`${process.env.VUE_APP_API_URL}/product/get-all?page=${pageSelect}&token=${this.accessToken}`).then((res) => {
                 if (res.data.status && (res.data.result.perPage ? true : false)) {
                     this.productsData = res.data;
+                    this.totalProducts = res.data.totalProducts;
                 } else {
                     this.productsData = {
                         currentPage: null,

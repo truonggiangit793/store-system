@@ -5,6 +5,9 @@
             <ThemifyIcon icon="menu" />
             <h1 class="ml-2">Accounts list</h1>
         </div>
+        <div class="flex items-center mb-4 text-gray-700 font-bold uppercase">
+            <h1 class="ml-2">Total accounts: {{ totalAccounts }}</h1>
+        </div>
         <div class="overflow-x-auto relative">
             <table class="overflow-scroll w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
@@ -61,6 +64,7 @@ export default {
         return {
             isLoading: true,
             accountList: null,
+            totalAccounts: 0,
         };
     },
     async mounted() {
@@ -75,6 +79,7 @@ export default {
                 .then((res) => {
                     if (res.data.status) {
                         this.accountList = res.data.result;
+                        this.totalAccounts = res.data.result.total;
                     }
                 })
                 .catch(() => {

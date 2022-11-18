@@ -414,7 +414,7 @@ module.exports = {
                     email: req.body.email || accountQuery.email,
                     fullName: req.body.fullName ? req.body.fullName.toUpperCase() : null || accountQuery.fullName,
                     phoneNumber: req.body.phoneNumber || accountQuery.phoneNumber,
-                    role: req.body.role || accountQuery.role,
+                    role: req.body.role ? (accountQuery.role == "ADMIN" ? "ADMIN" : req.body.role) : accountQuery.role,
                 },
                 { upsert: true, new: true, setDefaultsOnInsert: true }
             );
