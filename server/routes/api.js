@@ -42,6 +42,7 @@ const {
     transactionGetAll,
     transactionVisualize,
     transactionVisualizeExport,
+    transactionTopWeek,
 } = require("./modules/transaction");
 
 const { supplierImport, supplierRegister, supplierDelete, supplierGetAll, supplierGetDetail } = require("./modules/suppliers");
@@ -135,6 +136,8 @@ Router.get("/customer/:customerID/detail", authentication, customerGetDetail);
 Router.post("/transaction/new", authentication, transactionNew);
 
 Router.get("/transaction/get-all", authentication, transactionGetAll);
+
+Router.get("/transaction/top-week", authentication, transactionTopWeek);
 
 Router.get("/transaction/visualize", authentication, authorization.admin, transactionVisualize);
 

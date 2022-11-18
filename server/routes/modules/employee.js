@@ -318,21 +318,25 @@ module.exports = {
     },
     employeeGetAll: async (req, res, next) => {
         // #swagger.tags = ['Employee']
+        let dataArray = [];
         const employeeQueryAll = await employeeModel.find({});
         const accountQueryAll = await accountModel.find({});
-        const data = employeeQueryAll.map((employee) => {
-            return {
-                userCode: accountQueryAll.find((account) => account.userCode == employee.userCode).userCode,
-                fullName: accountQueryAll.find((account) => account.userCode == employee.userCode).fullName,
-                preSalary: employee.preSalary,
-                role: accountQueryAll.find((account) => account.userCode == employee.userCode).role,
-                updatedAt: accountQueryAll.find((account) => account.userCode == employee.userCode).updatedAt,
-            };
+        employeeQueryAll.forEach((employee) => {
+            let account = accountQueryAll.find((account) => account.userCode == employee.userCode);
+            if (account) {
+                dataArray.push({
+                    userCode: account.userCode,
+                    fullName: account.fullName,
+                    preSalary: employee.preSalary,
+                    role: account.role,
+                    updatedAt: account.updatedAt,
+                });
+            }
         });
         return res.status(200).json({
             status: true,
             statusCode: 200,
-            result: data ? data : [],
+            result: dataArray,
         });
     },
     employeeGetDetail: async (req, res, next) => {
