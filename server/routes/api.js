@@ -65,7 +65,7 @@ Router.post("/account/register", authentication, authorization.admin, accountReg
 
 Router.delete("/account/disable/:userCode", authentication, authorization.admin, accountDisable);
 
-Router.get("/account/:userCode/detail", authentication, authorization.manager, accountGetDetail);
+Router.get("/account/:userCode/detail", authentication, accountGetDetail);
 
 Router.get("/account/me", authentication, accountGetProfile);
 
